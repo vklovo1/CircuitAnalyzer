@@ -35,7 +35,7 @@ public:
     }
 
     void setInternalResistance(double internalResistance) {
-        internalResistance = internalResistance;
+        Source::internalResistance = internalResistance;
     }
 
     bool isOrientedTowardsSecondNode() const {
@@ -46,13 +46,9 @@ public:
         Source::orientedTowardsSecondNode = orientedTowardsSecondNode;
     }
 
-    bool isIdeal() const {
-        return fabs(internalResistance) < EPSILON;
-    }
+    virtual bool isIdeal() = 0;
 
-    void setIdeal() {
-        Source::internalResistance = 0;
-    }
+    virtual void setIdeal() = 0;
 
     void setValue(double value) {
         Source::value = value;
@@ -69,6 +65,14 @@ public:
     Source(name, value, orientedTowardsSecondNode) {
         this->setInternalResistance(internalResistance);
     }
+
+    void setIdeal() override {
+        this->setInternalResistance(0);
+    }
+
+    bool isIdeal() override {
+        return fabs(this->getInternalResistance()) < EPSILON;
+    }
 };
 
 class CurrentSource: public Source {
@@ -77,12 +81,22 @@ public:
     Source(name, value, orientedTowardsSecondNode) {
         this->setInternalResistance(internalResistance);
     }
+
+    bool isIdeal() override {
+        return fabs(1 + getInternalResistance()) < EPSILON;
+    }
+
+    void setIdeal() override {
+        this->setInternalResistance(-1);
+    }
 };
 
 class Resistor: public Component {
     double value;
 public:
-    Resistor(const string &name, double value) : Component(name) {};
+    Resistor(const string &name, double value) : Component(name) {
+        setValue(value);
+    };
 
     void setValue(double value) {
         Resistor::value = value;
@@ -95,12 +109,11 @@ public:
 
 class Instrument: public Component {
     bool orientedTowardsSecondNode;
-    bool ideal;
+    double internalResistance;
     double displayedValue;
 public:
-    Instrument(const string &name, double displayedValue, double internalResistance, bool orientedTowardsSecondNode, bool ideal)
-            : Component(name),
-              orientedTowardsSecondNode(orientedTowardsSecondNode), ideal(ideal), displayedValue(displayedValue) {};
+    Instrument(const string &name, bool orientedTowardsSecondNode, double internalResistance) : Component(name),
+        orientedTowardsSecondNode(orientedTowardsSecondNode), internalResistance(internalResistance) {}
 
     bool isOrientedTowardsSecondNode() const {
         return orientedTowardsSecondNode;
@@ -110,88 +123,59 @@ public:
         Instrument::orientedTowardsSecondNode = orientedTowardsSecondNode;
     }
 
-    bool isIdeal() const {
-        return ideal;
+    double getInternalResistance() const {
+        return internalResistance;
     }
 
-    void setIdeal(bool ideal) {
-        Instrument::ideal = ideal;
+    void setInternalResistance(double internalResistance) {
+        Instrument::internalResistance = internalResistance;
+    }
+
+    double getDisplayedValue() const {
+        return displayedValue;
     }
 
     void setDisplayedValue(double displayedValue) {
         Instrument::displayedValue = displayedValue;
     }
 
-    double getDisplayedValue() const {
-        return displayedValue;
-    }
+    virtual void setIdeal() = 0;
+
+    virtual bool isIdeal() = 0;
 };
 
 class Voltmeter : public Instrument {
-    double internalResistance;
-
 public:
-    Voltmeter(const string &name, double displayedValue, double internalResistance, bool orientedTowardsSecondNode,
-              bool ideal, double internalResistance1) : Instrument(name, displayedValue, internalResistance,
-                                                                   orientedTowardsSecondNode, ideal),
-                                                        internalResistance(internalResistance1) {}
+    Voltmeter(const string &name, bool orientedTowardsSecondNode, double internalResistance) :
+        Instrument(name, orientedTowardsSecondNode, internalResistance) {}
 
-    double getInternalResistance() const {
-        return internalResistance;
+    void setIdeal() override {
+        this->setInternalResistance(0);
     }
 
-    void setInternalResistance(double internalResistance) {
-        Voltmeter::internalResistance = internalResistance;
+    bool isIdeal() override {
+        return fabs(getInternalResistance()) < EPSILON;
     }
 };
 
 class Ampermeter : public Instrument {
-    double internalResistance;
 public:
-    Ampermeter(const string &name, double displayedValue, double internalResistance, bool orientedTowardsSecondNode,
-               bool ideal, double internalResistance1) : Instrument(name, displayedValue, internalResistance,
-                                                                    orientedTowardsSecondNode, ideal),
-                                                         internalResistance(internalResistance1) {}
+    Ampermeter(const string &name, bool orientedTowardsSecondNode, double internalResistance) : Instrument(name,
+                                                                                                           orientedTowardsSecondNode,
+                                                                                                           internalResistance) {}
 
-    double getInternalResistance() const {
-        return internalResistance;
+    void setIdeal() override {
+        this->setInternalResistance(-1);
     }
 
-    void setInternalResistance(double internalResistance) {
-        Ampermeter::internalResistance = internalResistance;
+    bool isIdeal() override {
+        return fabs(getInternalResistance() + 1) < EPSILON;
     }
 };
 
 class Wattmeter : public Instrument {
-    double internalResistanceVolt;
-    double internalResistanceAmper;
-public:
-    Wattmeter(const string &name, double displayedValue, double internalResistance, bool orientedTowardsSecondNode,
-              bool ideal, double internalResistanceVolt, double internalResistanceAmper) : Instrument(name,
-                                                                                                      displayedValue,
-                                                                                                      internalResistance,
-                                                                                                      orientedTowardsSecondNode,
-                                                                                                      ideal),
-                                                                                           internalResistanceVolt(
-                                                                                                   internalResistanceVolt),
-                                                                                           internalResistanceAmper(
-                                                                                                   internalResistanceAmper) {}
-
-    double getInternalResistanceVolt() const {
-        return internalResistanceVolt;
-    }
-
-    void setInternalResistanceVolt(double internalResistanceVolt) {
-        Wattmeter::internalResistanceVolt = internalResistanceVolt;
-    }
-
-    double getInternalResistanceAmper() const {
-        return internalResistanceAmper;
-    }
-
-    void setInternalResistanceAmper(double internalResistanceAmper) {
-        Wattmeter::internalResistanceAmper = internalResistanceAmper;
-    }
+    Voltmeter voltmeter;
+    Ampermeter ampermeter;
 };
 
 class Node {
@@ -202,7 +186,7 @@ public:
         return voltage;
     }
 
-    void setVoltage(double voltage) {
+    virtual void setVoltage(double voltage) {
         Node::voltage = voltage;
     }
 };
@@ -212,6 +196,7 @@ public:
     Ground() {
         this->setVoltage(0);
     }
+
 };
 
 class Branch {
