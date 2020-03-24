@@ -10,8 +10,10 @@
 #include "main.cpp"
 
 class Circuit {
-    std::vector<Branch> branches;
+    Circuit();
 
+    std::vector<Branch> branches;
+    int numberOfNodes;
 public:
     Circuit(const vector<Branch> &branches);
 
@@ -22,6 +24,18 @@ public:
     void addBranch(const Branch &branch);
 
     void removeBranch(const Branch &branch);
+
+    int getNumberOfBranches();
+
+    int getNumberOfNodes();
+
+    void addComponent(Component component, int coordinateX, int coordinateY);
+
+    int getIndexOfBranchOfNode(Node node);
+
+    void addComponent(Component component, string nodeNameFirst, string nodeNameSecond);
+
+    int getNumberOfBranchesFromNode(Node node);
 };
 
 

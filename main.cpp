@@ -185,6 +185,14 @@ class Node {
 public:
     Node(const string &name) : name(name) {}
 
+    const string &getName() const {
+        return name;
+    }
+
+    void setName(const string &name) {
+        Node::name = name;
+    }
+
     double getVoltage() const {
         return voltage;
     }
