@@ -215,7 +215,7 @@ public:
         Branch::current = current;
     }
 
-    const pair<Node, Node> &getNodes() const {
+    pair<Node, Node> &getNodes() {
         return nodes;
     }
 
@@ -223,12 +223,41 @@ public:
         Branch::nodes = nodes;
     }
 
-    const vector<Component> &getComponents() const {
+    const Node &getFirstNode() const {
+        return nodes.first;
+    };
+
+    const Node &getSecondNode() const {
+        return nodes.second;
+    }
+
+    void setFirstNode(const Node &node) {
+        nodes.first = node;
+    }
+
+    void setSecondNode(const Node &node) {
+        nodes.second = node;
+    }
+
+    vector<Component> &getComponents() {
         return components;
     }
 
     void setComponents(const vector<Component> &components) {
         Branch::components = components;
+    }
+
+    void addComponent(const Component &component) {
+        components.push_back(component);
+    }
+
+    void removeComponent(const Component &component) {
+        for(int i = 0; i < components.size(); i++) {
+            if (components.at(i).getName() == component.getName()) {
+                components.erase(components.begin() + i);
+                break;
+            }
+        }
     }
 };
 
