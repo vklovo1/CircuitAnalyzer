@@ -3,4 +3,4 @@ project(CircuitAnalyzer)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(CircuitAnalyzer main.cpp)
+add_executable(CircuitAnalyzer main.cpp Circuit.cpp Circuit.h)

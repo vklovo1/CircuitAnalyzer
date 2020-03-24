@@ -179,9 +179,12 @@ class Wattmeter : public Instrument {
 };
 
 class Node {
+    string name;
     double voltage;
 
 public:
+    Node(const string &name) : name(name) {}
+
     double getVoltage() const {
         return voltage;
     }
@@ -193,19 +196,27 @@ public:
 
 class Ground : public Node {
 public:
-    Ground() {
+    Ground(const string &name) : Node(name) {
         this->setVoltage(0);
     }
-
 };
 
 class Branch {
     double current;
+    string name;
     pair<Node, Node> nodes;
     vector<Component> components;
 
 public:
-    Branch(const pair<Node, Node> &nodes, const vector<Component> &components) : nodes(nodes), components(components) {}
+    Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components) {}
+
+    const string &getName() const {
+        return name;
+    }
+
+    void setName(const string &name) {
+        Branch::name = name;
+    }
 
     double getCurrent() const {
         return current;
