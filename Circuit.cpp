@@ -81,6 +81,36 @@ int Circuit::getNumberOfNodes() {
 }
 
 vector<Branch>  Circuit::MinimumSpanningTree(Node starting_node){
+    Node current_node=starting_node;
+    vector<Branch> tree_branches;
+    std::stack<Node> order_of_visited_nodes; // redom ubacujem cvorove koje uzimam LIFO
+    while(true){
+        vector<Branch> branches_containing_node = getBranchesContainingNode(current_node);
+        if(current_node.getName()==starting_node.getName() && starting_node.isVisited()) break; //Ako se vrati nazad do pocetnog cvora, kraj
+        current_node.setVisited(true);
+        for(int i = 0; i < branches_containing_node.size(); i++){
+            if(branches_containing_node.at(i).getFirstNode().getName()==current_node.getName() && !branches_containing_node.at(i).getSecondNode().isVisited()){
+                tree_branches.push_back(branches_containing_node.at(i));
+                order_of_visited_nodes.push(current_node);
+                current_node=branches_containing_node.at(i).getSecondNode();
+                break;
+            }
+            else if(branches_containing_node.at(i).getSecondNode().getName()==current_node.getName() && !branches_containing_node.at(i).getFirstNode().isVisited()){
+                    tree_branches.push_back(branches_containing_node.at(i)); //MOZDA CE BIT DUPLIH GRANA
+                    order_of_visited_nodes.push(current_node);
+                    current_node=branches_containing_node.at(i).getFirstNode();
+                    break;
+            }
+            else{
+                if(i==branches_containing_node.size()-1) {
+                    current_node=order_of_visited_nodes.top();
+                    order_of_visited_nodes.pop();
+                }
+            }
+        }
+
+
+    }
 
 
 

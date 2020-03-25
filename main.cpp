@@ -181,12 +181,21 @@ class Wattmeter : public Instrument {
 class Node {
     string name;
     double voltage;
+    bool visited=0;
 
 public:
     Node(const string &name) : name(name) {}
 
     const string &getName() const {
         return name;
+    }
+
+    bool isVisited() const {
+        return visited;
+    }
+
+    void setVisited(bool visited) {
+        Node::visited = visited;
     }
 
     void setName(const string &name) {

@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "main.cpp"
+#include <stack>
 
 class Circuit {
     Circuit();
