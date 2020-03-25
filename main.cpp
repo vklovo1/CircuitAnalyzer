@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include "Circuit.h"
+#include "Circuit.cpp"
 
 using std::string;
 using std::pair;
@@ -181,7 +183,7 @@ class Wattmeter : public Instrument {
 class Node {
     string name;
     double voltage;
-    bool visited=0;
+    bool visited=false;
 
 public:
     Node(const string &name) : name(name) {}

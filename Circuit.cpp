@@ -52,7 +52,7 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
     return numberOfBranches;
 }
 
-void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
+/*void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
     if(branches.size() == 0) {
         Node node1 = Node("N1");
         Node node2 = Node("N2");
@@ -70,7 +70,7 @@ void Circuit::addComponent(Component component, string nodeNameFirst = "", strin
             }
         }
     }
-}
+}*/
 
 int Circuit::getNumberOfBranches() {
     return branches.size();

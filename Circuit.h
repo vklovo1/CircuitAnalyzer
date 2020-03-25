@@ -11,11 +11,12 @@
 #include <stack>
 
 class Circuit {
-    Circuit();
+
 
     std::vector<Branch> branches;
     int numberOfNodes;
 public:
+    Circuit();
     Circuit(const vector<Branch> &branches);
 
     const vector<Branch> &getBranches() const;
