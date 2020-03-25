@@ -218,9 +218,13 @@ class Branch {
 public:
     Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components) {}
 
+
+
     const string &getName() const {
         return name;
     }
+
+
 
     void setName(const string &name) {
         Branch::name = name;

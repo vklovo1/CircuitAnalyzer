@@ -32,13 +32,14 @@ void Circuit::removeBranch(const Branch &branch) {
     }
 }
 
-int Circuit::getIndexOfBranchOfNode(Node node) {
+vector<Branch> Circuit::getBranchesContainingNode(Node node) {
+    vector<Branch> branches_containing_node;
     for(int i = 0; i < branches.size(); i++) {
         if(branches[i].getNodes().first.getName() == node.getName() ||
             branches[i].getNodes().second.getName() == node.getName())
-            return i;
+            branches_containing_node.push_back(branches[i]);
     }
-    return -1;
+    return branches_containing_node;
 }
 
 int Circuit::getNumberOfBranchesFromNode(Node node) {
@@ -78,6 +79,12 @@ int Circuit::getNumberOfBranches() {
 int Circuit::getNumberOfNodes() {
     return 0;
 }
+
+vector<Branch>  Circuit::MinimumSpanningTree(Node starting_node){
+
+
+
+};
 
 
 

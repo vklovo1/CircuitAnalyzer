@@ -31,11 +31,15 @@ public:
 
     void addComponent(Component component, int coordinateX, int coordinateY);
 
-    int getIndexOfBranchOfNode(Node node);
-
     void addComponent(Component component, string nodeNameFirst, string nodeNameSecond);
 
     int getNumberOfBranchesFromNode(Node node);
+
+
+
+    vector<Branch> MinimumSpanningTree(Node starting_node);
+
+    vector<Branch> getBranchesContainingNode(Node node);
 };
 
 
