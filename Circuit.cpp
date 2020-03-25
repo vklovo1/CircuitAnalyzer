@@ -124,16 +124,34 @@ return tree_branches;
 
 };
 int main(){
-    Node prvi("N1");
-    Node drugi("N2");
-    Branch branch1 = Branch("B1", std::pair<Node, Node>(prvi, drugi),std::vector<Component>{});
-    Branch branch2 = Branch("B2", std::pair<Node, Node>(drugi, prvi),std::vector<Component>{});
-    Branch branch3 = Branch("B3", std::pair<Node, Node>(prvi, drugi),std::vector<Component>{});
-    const vector<Branch> grane = {branch1, branch2, branch3};
+    Node a("A");
+    Node b("B");
+    Node c("C");
+    Node d("D");
+    Node e("E");
+    Node f("F");
+    Node g("G");
+    Branch B1 = Branch("1", std::pair<Node, Node>(a, f),std::vector<Component>{});
+    Branch B2 = Branch("2", std::pair<Node, Node>(f, c),std::vector<Component>{});
+    Branch B3 = Branch("3", std::pair<Node, Node>(c, e),std::vector<Component>{});
+    Branch B4 = Branch("4", std::pair<Node, Node>(e, g),std::vector<Component>{});
+    Branch B5 = Branch("5", std::pair<Node, Node>(g, d),std::vector<Component>{});
+    Branch B6 = Branch("6", std::pair<Node, Node>(d, a),std::vector<Component>{});
+    Branch B7 = Branch("7", std::pair<Node, Node>(a, b),std::vector<Component>{});
+    Branch B8 = Branch("8", std::pair<Node, Node>(b, d),std::vector<Component>{});
+    Branch B9 = Branch("9", std::pair<Node, Node>(d, e),std::vector<Component>{});
+    Branch B10 = Branch("10", std::pair<Node, Node>(e, b),std::vector<Component>{});
+    Branch B11 = Branch("11", std::pair<Node, Node>(b, c),std::vector<Component>{});
+    Branch B12 = Branch("12", std::pair<Node, Node>(b, f),std::vector<Component>{});
+    const vector<Branch> grane = {B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12};
     Circuit krug1;
     krug1.setBranches(grane);
-    vector<Branch> stablo=krug1.MinimumSpanningTree(prvi);
-    std::cout<<"Stablo je: "<<stablo[0].getName()<<" broj "<<stablo.size();
+    vector<Branch> stablo=krug1.MinimumSpanningTree(a);
+    std::cout<<"Stablo je";
+    for(int i=0; i<stablo.size();i++){
+        std::cout <<stablo[i].getName()<<", ";
+    }
+    std::cout<<" broj "<<stablo.size();
 
 }
 
