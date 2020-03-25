@@ -77,7 +77,7 @@ public:
 
 class CurrentSource: public Source {
 public:
-    CurrentSource(const string &name, double value, bool orientedTowardsSecondNode, double internalResistance = HUGE_VAL) :
+    CurrentSource(const string &name, double value, bool orientedTowardsSecondNode, double internalResistance = -1) :
     Source(name, value, orientedTowardsSecondNode) {
         this->setInternalResistance(internalResistance);
     }
