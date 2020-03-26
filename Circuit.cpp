@@ -87,7 +87,8 @@ bool Circuit::isVisited(Node nodeToCheck, vector<Node>visited_nodes){
     return false;
 }
 
-vector<Branch>  Circuit::MinimumSpanningTree(Node startingNode){
+vector<Branch>  Circuit::getMinimumSpanningTree(){
+    Node startingNode=branches[0].getFirstNode();
     Node currentNode=startingNode;
     vector<Node> visitedNodes;
     vector<Branch> treeBranches;
@@ -122,7 +123,10 @@ vector<Branch>  Circuit::MinimumSpanningTree(Node startingNode){
 
 return treeBranches;
 
-};
+}
+vector<vector<Branch>> Circuit::getLoops(){
+
+}
 int main(){
     Node a("A");
     Node b("B");
@@ -146,7 +150,7 @@ int main(){
     const vector<Branch> grane = {B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12};
     Circuit krug1;
     krug1.setBranches(grane);
-    vector<Branch> stablo=krug1.MinimumSpanningTree(a);
+    vector<Branch> stablo= krug1.getMinimumSpanningTree(a);
     std::cout<<"Stablo je";
     for(int i=0; i<stablo.size();i++){
         std::cout <<stablo[i].getName()<<", ";
@@ -154,6 +158,7 @@ int main(){
     std::cout<<" broj "<<stablo.size();
 
 }
+
 
 
 
