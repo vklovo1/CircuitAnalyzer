@@ -33,13 +33,13 @@ void Circuit::removeBranch(const Branch &branch) {
 }
 
 vector<Branch> Circuit::getBranchesContainingNode(Node node) {
-    vector<Branch> branches_containing_node;
+    vector<Branch> branchesContainingNode;
     for(int i = 0; i < branches.size(); i++) {
         if(branches[i].getNodes().first.getName() == node.getName() ||
             branches[i].getNodes().second.getName() == node.getName())
-            branches_containing_node.push_back(branches[i]);
+            branchesContainingNode.push_back(branches[i]);
     }
-    return branches_containing_node;
+    return branchesContainingNode;
 }
 
 int Circuit::getNumberOfBranchesFromNode(Node node) {
@@ -80,39 +80,39 @@ int Circuit::getNumberOfNodes() {
     return 0;
 }
 
-bool Circuit::isVisited(Node node_to_check, vector<Node>visited_nodes){
+bool Circuit::isVisited(Node nodeToCheck, vector<Node>visited_nodes){
     for(int i = 0; i<visited_nodes.size(); i++){
-        if(node_to_check.getName()==visited_nodes[i].getName())return true;
+        if(nodeToCheck.getName() == visited_nodes[i].getName())return true;
     }
     return false;
 }
 
-vector<Branch>  Circuit::MinimumSpanningTree(Node starting_node){
-    Node current_node=starting_node;
-    vector<Node> visited_nodes;
-    vector<Branch> tree_branches;
-    std::stack<Node> order_of_visited_nodes; // redom ubacujem cvorove koje uzimam LIFO
+vector<Branch>  Circuit::MinimumSpanningTree(Node startingNode){
+    Node current_node=startingNode;
+    vector<Node> visitedNodes;
+    vector<Branch> treeBranches;
+    std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     while(true){
         vector<Branch> branches_containing_node = this->getBranchesContainingNode(current_node);
-        if(current_node.getName()==starting_node.getName() && isVisited(starting_node,visited_nodes))break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
-        visited_nodes.push_back(current_node);
+        if(current_node.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
+        visitedNodes.push_back(current_node);
         for(int i = 0; i < branches_containing_node.size(); i++){
-            if(branches_containing_node.at(i).getFirstNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getSecondNode(), visited_nodes)){
-                tree_branches.push_back(branches_containing_node.at(i));
-                order_of_visited_nodes.push(current_node);
+            if(branches_containing_node.at(i).getFirstNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getSecondNode(), visitedNodes)){
+                treeBranches.push_back(branches_containing_node.at(i));
+                orderOfVisitedNodes.push(current_node);
                 current_node=branches_containing_node.at(i).getSecondNode();
                 break;
             }
-            else if(branches_containing_node.at(i).getSecondNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getFirstNode(),visited_nodes)){
-                    tree_branches.push_back(branches_containing_node.at(i)); //MOZDA CE BIT DUPLIH GRANA
-                    order_of_visited_nodes.push(current_node);
+            else if(branches_containing_node.at(i).getSecondNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getFirstNode(), visitedNodes)){
+                    treeBranches.push_back(branches_containing_node.at(i)); //MOZDA CE BIT DUPLIH GRANA
+                    orderOfVisitedNodes.push(current_node);
                     current_node=branches_containing_node.at(i).getFirstNode();
                     break;
             }
             else{
                 if(i==branches_containing_node.size()-1) {
-                    current_node=order_of_visited_nodes.top();
-                    order_of_visited_nodes.pop();
+                    current_node=orderOfVisitedNodes.top();
+                    orderOfVisitedNodes.pop();
                 }
             }
         }
@@ -120,7 +120,7 @@ vector<Branch>  Circuit::MinimumSpanningTree(Node starting_node){
 
     }
 
-return tree_branches;
+return treeBranches;
 
 };
 int main(){

@@ -39,11 +39,11 @@ public:
 
 
 
-    vector<Branch> MinimumSpanningTree(Node starting_node);
+    vector<Branch> MinimumSpanningTree(Node startingNode);
 
     vector<Branch> getBranchesContainingNode(Node node);
 
-    bool isVisited(Node node_to_check, vector<Node> visited_nodes);
+    bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
 };
 
 
