@@ -94,25 +94,25 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
     vector<Branch> treeBranches;
     std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     while (true) {
-        vector<Branch> branches_containing_node = this->getBranchesContainingNode(currentNode);
+        vector<Branch> branchesContainingNode = this->getBranchesContainingNode(currentNode);
         if (currentNode.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))
             break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
         visitedNodes.push_back(currentNode);
-        for (int i = 0; i < branches_containing_node.size(); i++) {
-            if (branches_containing_node.at(i).getFirstNode().getName() == currentNode.getName() &&
-                !isVisited(branches_containing_node.at(i).getSecondNode(), visitedNodes)) {
-                treeBranches.push_back(branches_containing_node.at(i));
+        for (int i = 0; i < branchesContainingNode.size(); i++) {
+            if (branchesContainingNode.at(i).getFirstNode().getName() == currentNode.getName() &&
+                !isVisited(branchesContainingNode.at(i).getSecondNode(), visitedNodes)) {
+                treeBranches.push_back(branchesContainingNode.at(i));
                 orderOfVisitedNodes.push(currentNode);
-                currentNode = branches_containing_node.at(i).getSecondNode();
+                currentNode = branchesContainingNode.at(i).getSecondNode();
                 break;
-            } else if (branches_containing_node.at(i).getSecondNode().getName() == currentNode.getName() &&
-                       !isVisited(branches_containing_node.at(i).getFirstNode(), visitedNodes)) {
-                treeBranches.push_back(branches_containing_node.at(i)); //MOZDA CE BIT DUPLIH GRANA
+            } else if (branchesContainingNode.at(i).getSecondNode().getName() == currentNode.getName() &&
+                       !isVisited(branchesContainingNode.at(i).getFirstNode(), visitedNodes)) {
+                treeBranches.push_back(branchesContainingNode.at(i)); //MOZDA CE BIT DUPLIH GRANA
                 orderOfVisitedNodes.push(currentNode);
-                currentNode = branches_containing_node.at(i).getFirstNode();
+                currentNode = branchesContainingNode.at(i).getFirstNode();
                 break;
             } else {
-                if (i == branches_containing_node.size() - 1) {
+                if (i == branchesContainingNode.size() - 1) {
                     currentNode = orderOfVisitedNodes.top();
                     orderOfVisitedNodes.pop();
                 }
@@ -125,7 +125,7 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
     return treeBranches;
 }
 
-bool Circuit::isBranchInTheTree(Branch branchToCheck){
+bool Circuit::isBranchInTheTree(Branch branchToCheck) {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     for (int i = 0; i < minimumSpanningTree.size(); i++) {
         if (branchToCheck.getName() == minimumSpanningTree[i].getName())return true;
@@ -143,24 +143,54 @@ vector<Branch> Circuit::getFreeBranches() {
     return freeBranches;
 }
 
-
+bool Circuit::isVisitedBranch(Branch branchToCheck, vector<Branch> visitedBranches) {
+    for (int i = 0; i < visitedBranches.size(); i++) {
+        if (branchToCheck.getName() == visitedBranches[i].getName())return true;
+    }
+    return false;
+}
 
 vector<vector<Branch>> Circuit::getLoops() {
-    vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     vector<Branch> currentLoop;
-    vector<Branch> freeBranches=getFreeBranches();
-    vector<Branch> branches_containing_node;
-    Node startingNode=freeBranches[0].getFirstNode();
+    vector<Branch> freeBranches = getFreeBranches();
+    vector<Branch> branchesContainingNode;
+    vector<Node> visitedNodes;
     Node endingNode = freeBranches[0].getSecondNode();
-    Node currentNode=startingNode;
+    Node currentNode = freeBranches[0].getFirstNode();;
+    //std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     vector<vector<Branch>> loops; //Matrix of branches with each row containing branches that enter one loop
     for (int i = 0; i < freeBranches.size(); i++) {
-        while(true){
-            if(currentNode.getName()==endingNode.getName())break;
-            branches_containing_node = this->getBranchesContainingNode(currentNode);
+        currentNode = freeBranches[i].getFirstNode();
+        endingNode = freeBranches[i].getSecondNode();
+        visitedNodes.clear();
+        while (true) {
+            visitedNodes.push_back(currentNode);
+            if (currentNode.getName() == endingNode.getName())break;
+            branchesContainingNode = this->getBranchesContainingNode(currentNode);
+            for (int j = 0; j < branchesContainingNode.size(); j++) {
+                if (isBranchInTheTree(branchesContainingNode[j])) {
 
+                    if (!isVisited(branchesContainingNode[j].getFirstNode(), visitedNodes)) {
+                        //orderOfVisitedNodes.push(currentNode);
+                        currentNode = branchesContainingNode[j].getFirstNode();
+                        currentLoop.push_back(branchesContainingNode[j]);
+                        break;
+                    } else if (!isVisited(branchesContainingNode[j].getSecondNode(), visitedNodes)) {
+                       // orderOfVisitedNodes.push(currentNode);
+                        currentNode = branchesContainingNode[j].getSecondNode();
+                        currentLoop.push_back(branchesContainingNode[j]);
+                        break;
+                    } /*else{
+                        currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
+                        currentNode=orderOfVisitedNodes.top();
+                        //orderOfVisitedNodes.pop();
+                        break;
+                    }*/
+                }
+                }
+            }
+        loops.push_back(currentLoop);
         }
-    }
     return loops;
 }
 
@@ -189,6 +219,7 @@ int main() {
     krug1.setBranches(grane);
     vector<Branch> stablo = krug1.getMinimumSpanningTree();
     vector<Branch> slobodnaGrana = krug1.getFreeBranches();
+    vector<vector<Branch>> konture = krug1.getLoops();
     std::cout << "Stablo je";
     for (int i = 0; i < stablo.size(); i++) {
         std::cout << stablo[i].getName() << ", ";
@@ -196,6 +227,11 @@ int main() {
     std::cout << " broj " << stablo.size() << std::endl;
     for (int i = 0; i < slobodnaGrana.size(); i++) {
         std::cout << slobodnaGrana[i].getName() << ", ";
+    }
+    for(int i =0; i<konture.size();i++){
+        for(int j=0; j<konture[i].size();j++){
+            std::cout<<std::endl<<konture[i][j].getName()<<" ";
+        }
     }
 
 }

@@ -48,6 +48,8 @@ public:
     vector<Branch> getFreeBranches();
 
     bool isBranchInTheTree(Branch branchToCheck);
+
+    bool isVisitedBranch(Branch branchToCheck, vector<Branch> visitedBranches);
 };
 
 
