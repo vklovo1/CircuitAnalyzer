@@ -37,10 +37,6 @@ public:
 
     int getNumberOfBranchesFromNode(Node node);
 
-
-
-    vector<Branch> getMinimumSpanningTree(Node startingNode);
-
     vector<Branch> getBranchesContainingNode(Node node);
 
     bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
@@ -48,6 +44,8 @@ public:
     vector<Branch> getMinimumSpanningTree();
 
     vector<vector<Branch>> getLoops();
+
+    vector<Branch> getFreeBranches();
 };
 
 
