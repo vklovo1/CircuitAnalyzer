@@ -46,6 +46,8 @@ public:
     vector<vector<Branch>> getLoops();
 
     vector<Branch> getFreeBranches();
+
+    bool isBranchInTheTree(Branch branchToCheck);
 };
 
 

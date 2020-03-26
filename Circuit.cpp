@@ -125,27 +125,41 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
     return treeBranches;
 }
 
+bool Circuit::isBranchInTheTree(Branch branchToCheck){
+    vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
+    for (int i = 0; i < minimumSpanningTree.size(); i++) {
+        if (branchToCheck.getName() == minimumSpanningTree[i].getName())return true;
+    }
+    return false;
+}
+
 vector<Branch> Circuit::getFreeBranches() {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     vector<Branch> freeBranches;
     bool branchInTheTree = false;
     for (int i = 0; i < getNumberOfBranches(); i++) {
-        branchInTheTree = false;
-        for (int j = 0; j < minimumSpanningTree.size(); j++) {
-            if (branches[i].getName() == minimumSpanningTree[j].getName())branchInTheTree = true;
-        }
-        if (!branchInTheTree) freeBranches.push_back(branches[i]);
+        if (!isBranchInTheTree(branches[i]))freeBranches.push_back(branches[i]);
     }
     return freeBranches;
 }
 
+
+
 vector<vector<Branch>> Circuit::getLoops() {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     vector<Branch> currentLoop;
-    // Branch freeBranch;
+    vector<Branch> freeBranches=getFreeBranches();
+    vector<Branch> branches_containing_node;
+    Node startingNode=freeBranches[0].getFirstNode();
+    Node endingNode = freeBranches[0].getSecondNode();
+    Node currentNode=startingNode;
     vector<vector<Branch>> loops; //Matrix of branches with each row containing branches that enter one loop
-    for (int i = 0; i < getNumberOfBranches() - minimumSpanningTree.size(); i++) {
+    for (int i = 0; i < freeBranches.size(); i++) {
+        while(true){
+            if(currentNode.getName()==endingNode.getName())break;
+            branches_containing_node = this->getBranchesContainingNode(currentNode);
 
+        }
     }
     return loops;
 }

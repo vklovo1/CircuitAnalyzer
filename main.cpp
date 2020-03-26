@@ -218,8 +218,9 @@ class Branch {
     vector<Component> components;
 
 public:
-    Branch();
-    Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components) {}
+
+
+    Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components){}
 
 
 
