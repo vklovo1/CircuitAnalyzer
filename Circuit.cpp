@@ -88,30 +88,30 @@ bool Circuit::isVisited(Node nodeToCheck, vector<Node>visited_nodes){
 }
 
 vector<Branch>  Circuit::MinimumSpanningTree(Node startingNode){
-    Node current_node=startingNode;
+    Node currentNode=startingNode;
     vector<Node> visitedNodes;
     vector<Branch> treeBranches;
     std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     while(true){
-        vector<Branch> branches_containing_node = this->getBranchesContainingNode(current_node);
-        if(current_node.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
-        visitedNodes.push_back(current_node);
+        vector<Branch> branches_containing_node = this->getBranchesContainingNode(currentNode);
+        if(currentNode.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
+        visitedNodes.push_back(currentNode);
         for(int i = 0; i < branches_containing_node.size(); i++){
-            if(branches_containing_node.at(i).getFirstNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getSecondNode(), visitedNodes)){
+            if(branches_containing_node.at(i).getFirstNode().getName() == currentNode.getName() && !isVisited(branches_containing_node.at(i).getSecondNode(), visitedNodes)){
                 treeBranches.push_back(branches_containing_node.at(i));
-                orderOfVisitedNodes.push(current_node);
-                current_node=branches_containing_node.at(i).getSecondNode();
+                orderOfVisitedNodes.push(currentNode);
+                currentNode=branches_containing_node.at(i).getSecondNode();
                 break;
             }
-            else if(branches_containing_node.at(i).getSecondNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getFirstNode(), visitedNodes)){
+            else if(branches_containing_node.at(i).getSecondNode().getName() == currentNode.getName() && !isVisited(branches_containing_node.at(i).getFirstNode(), visitedNodes)){
                     treeBranches.push_back(branches_containing_node.at(i)); //MOZDA CE BIT DUPLIH GRANA
-                    orderOfVisitedNodes.push(current_node);
-                    current_node=branches_containing_node.at(i).getFirstNode();
+                    orderOfVisitedNodes.push(currentNode);
+                currentNode=branches_containing_node.at(i).getFirstNode();
                     break;
             }
             else{
                 if(i==branches_containing_node.size()-1) {
-                    current_node=orderOfVisitedNodes.top();
+                    currentNode=orderOfVisitedNodes.top();
                     orderOfVisitedNodes.pop();
                 }
             }
