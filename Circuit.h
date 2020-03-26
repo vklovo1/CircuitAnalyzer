@@ -39,7 +39,7 @@ public:
 
 
 
-    vector<Branch> MinimumSpanningTree(Node startingNode);
+    vector<Branch> getMinimumSpanningTree(Node startingNode);
 
     vector<Branch> getBranchesContainingNode(Node node);
 

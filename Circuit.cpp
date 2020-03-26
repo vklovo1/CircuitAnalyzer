@@ -52,25 +52,26 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
     return numberOfBranches;
 }
 
-/*void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
+void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
     if(branches.size() == 0) {
         Node node1 = Node("N1");
         Node node2 = Node("N2");
         Branch branch1 = Branch("B1", std::pair<Node, Node>(node1, node2), std::vector<Component>{component});
         addBranch(branch1);
     } else {
-        int branchContainingNodeIndex = getIndexOfBranchOfNode(Node(nodeNameFirst));
-        if(branchContainingNodeIndex != -1) { //case1
-        } else {
-            branchContainingNodeIndex = getIndexOfBranchOfNode(Node(nodeNameSecond));
-            if(branchContainingNodeIndex != -1) { //case2
+        auto branchesContainingFirstNode = getBranchesContainingNode(Node(nodeNameFirst));
+        if(branchesContainingFirstNode.size() != 0) { //first node already exists
 
-            } else { //case3
+        } else {
+            auto branchesContainingSecondNode = getBranchesContainingNode(Node(nodeNameFirst));
+            if(branchesContainingSecondNode.size() != 0) {
+
+            } else {
 
             }
         }
     }
-}*/
+}
 
 int Circuit::getNumberOfBranches() {
     return branches.size();
@@ -87,14 +88,15 @@ bool Circuit::isVisited(Node nodeToCheck, vector<Node>visited_nodes){
     return false;
 }
 
-vector<Branch>  Circuit::MinimumSpanningTree(Node startingNode){
+vector<Branch>  Circuit::getMinimumSpanningTree(Node startingNode){
     Node current_node=startingNode;
     vector<Node> visitedNodes;
     vector<Branch> treeBranches;
     std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     while(true){
         vector<Branch> branches_containing_node = this->getBranchesContainingNode(current_node);
-        if(current_node.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
+        if(current_node.getName() == startingNode.getName() && isVisited(startingNode, visitedNodes))
+            break; //Ako se vrati nazad do pocetnog cvora, kraj (MOZDA OVO NE VALJA)
         visitedNodes.push_back(current_node);
         for(int i = 0; i < branches_containing_node.size(); i++){
             if(branches_containing_node.at(i).getFirstNode().getName()==current_node.getName() && !isVisited(branches_containing_node.at(i).getSecondNode(), visitedNodes)){
@@ -146,7 +148,7 @@ int main(){
     const vector<Branch> grane = {B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12};
     Circuit krug1;
     krug1.setBranches(grane);
-    vector<Branch> stablo=krug1.MinimumSpanningTree(a);
+    vector<Branch> stablo= krug1.getMinimumSpanningTree(a);
     std::cout<<"Stablo je";
     for(int i=0; i<stablo.size();i++){
         std::cout <<stablo[i].getName()<<", ";
