@@ -4,6 +4,8 @@
 
 #include "Circuit.h"
 
+#include <utility>
+
 Circuit::Circuit(const vector<Branch> &branches) : branches(branches) {}
 
 Circuit::Circuit() {
@@ -53,23 +55,32 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
 }
 
 void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
-    if (branches.size() == 0) {
-        Node node1 = Node("N1");
-        Node node2 = Node("N2");
-        Branch branch1 = Branch("B1", std::pair<Node, Node>(node1, node2), std::vector<Component>{component});
-        addBranch(branch1);
-    } else {
-        auto branchesContainingFirstNode = getBranchesContainingNode(Node(nodeNameFirst));
-        if (branchesContainingFirstNode.size() != 0) { //first node already exists
+    Branch newBranch("B" + std::to_string(getNumberOfBranches()), std::pair<Node, Node>(Node(nodeNameFirst), Node(nodeNameSecond)),
+            vector<Component>{std::move(component)});
+    addBranch(newBranch);
+}
 
-        } else {
-            auto branchesContainingSecondNode = getBranchesContainingNode(Node(nodeNameFirst));
-            if (branchesContainingSecondNode.size() != 0) {
+void Circuit::simplifyCircuit() {
+    for(int i = 0; i < branches.size(); i++) {
+        if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3) {
 
-            } else {
-
-            }
         }
+    }
+}
+
+void Circuit::drawWire(string nodeNameFirst, string nodeNameSecond) {
+    int firstNodeIndex = std::stoi(nodeNameFirst.substr(1, string::npos));
+    int secondNodeIndex = std::stoi(nodeNameSecond.substr(1, string::npos));
+
+    string lesserIndexNodeName;
+    if(firstNodeIndex < secondNodeIndex) lesserIndexNodeName = nodeNameFirst;
+    else lesserIndexNodeName = nodeNameSecond;
+
+    for(Branch b : branches) {
+        if(b.getFirstNode().getName() == nodeNameSecond)
+            b.setFirstNode(Node(lesserIndexNodeName));
+        else if(b.getSecondNode().getName() == nodeNameSecond)
+            b.setSecondNode(Node(lesserIndexNodeName));
     }
 }
 

@@ -44,6 +44,10 @@ public:
     vector<Branch> getBranchesContainingNode(Node node);
 
     bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
+
+    void simplifyCircuit();
+
+    void drawWire(string nodeNameFirst, string nodeNameSecond);
 };
 
 
