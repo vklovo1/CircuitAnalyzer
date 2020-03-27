@@ -155,42 +155,47 @@ vector<vector<Branch>> Circuit::getLoops() {
     vector<Branch> freeBranches = getFreeBranches();
     vector<Branch> branchesContainingNode;
     vector<Node> visitedNodes;
+    bool goBack = false;
     Node endingNode = freeBranches[0].getSecondNode();
     Node currentNode = freeBranches[0].getFirstNode();;
-    //std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
+    std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
     vector<vector<Branch>> loops; //Matrix of branches with each row containing branches that enter one loop
     for (int i = 0; i < freeBranches.size(); i++) {
         currentNode = freeBranches[i].getFirstNode();
         endingNode = freeBranches[i].getSecondNode();
+        currentLoop.push_back(freeBranches[i]);
         visitedNodes.clear();
         while (true) {
+            if (goBack) {
+                currentNode = orderOfVisitedNodes.top();
+                orderOfVisitedNodes.pop();
+                currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
+            }
             visitedNodes.push_back(currentNode);
             if (currentNode.getName() == endingNode.getName())break;
             branchesContainingNode = this->getBranchesContainingNode(currentNode);
+            goBack = false;
             for (int j = 0; j < branchesContainingNode.size(); j++) {
                 if (isBranchInTheTree(branchesContainingNode[j])) {
 
                     if (!isVisited(branchesContainingNode[j].getFirstNode(), visitedNodes)) {
-                        //orderOfVisitedNodes.push(currentNode);
+                        orderOfVisitedNodes.push(currentNode);
                         currentNode = branchesContainingNode[j].getFirstNode();
                         currentLoop.push_back(branchesContainingNode[j]);
                         break;
                     } else if (!isVisited(branchesContainingNode[j].getSecondNode(), visitedNodes)) {
-                       // orderOfVisitedNodes.push(currentNode);
+                        orderOfVisitedNodes.push(currentNode);
                         currentNode = branchesContainingNode[j].getSecondNode();
                         currentLoop.push_back(branchesContainingNode[j]);
                         break;
-                    } /*else{
-                        currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
-                        currentNode=orderOfVisitedNodes.top();
-                        //orderOfVisitedNodes.pop();
-                        break;
-                    }*/
+                    }
                 }
-                }
+                if (j == branchesContainingNode.size() - 1)goBack = true; //dead end - no tree branches to connect the loop, go back
             }
-        loops.push_back(currentLoop);
         }
+        loops.push_back(currentLoop);
+        currentLoop.clear();
+    }
     return loops;
 }
 
@@ -228,9 +233,10 @@ int main() {
     for (int i = 0; i < slobodnaGrana.size(); i++) {
         std::cout << slobodnaGrana[i].getName() << ", ";
     }
-    for(int i =0; i<konture.size();i++){
-        for(int j=0; j<konture[i].size();j++){
-            std::cout<<std::endl<<konture[i][j].getName()<<" ";
+    for (int i = 0; i < konture.size(); i++) {
+        std::cout << std::endl;
+        for (int j = 0; j < konture[i].size(); j++) {
+            std::cout << konture[i][j].getName() << " ";
         }
     }
 
