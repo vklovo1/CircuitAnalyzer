@@ -49,7 +49,6 @@ public:
 
     bool isBranchInTheTree(Branch branchToCheck);
 
-    bool isVisitedBranch(Branch branchToCheck, vector<Branch> visitedBranches);
 };
 
 

@@ -143,12 +143,6 @@ vector<Branch> Circuit::getFreeBranches() {
     return freeBranches;
 }
 
-bool Circuit::isVisitedBranch(Branch branchToCheck, vector<Branch> visitedBranches) {
-    for (int i = 0; i < visitedBranches.size(); i++) {
-        if (branchToCheck.getName() == visitedBranches[i].getName())return true;
-    }
-    return false;
-}
 
 vector<vector<Branch>> Circuit::getLoops() {
     vector<Branch> currentLoop;
@@ -190,7 +184,8 @@ vector<vector<Branch>> Circuit::getLoops() {
                         break;
                     }
                 }
-                if (j == branchesContainingNode.size() - 1)goBack = true; //dead end - no tree branches to connect the loop, go back
+                if (j == branchesContainingNode.size() - 1)
+                    goBack = true; //dead end - no tree branches to connect the loop, go back
             }
         }
         loops.push_back(currentLoop);
@@ -222,7 +217,7 @@ int main() {
     Branch B13 = Branch("13", std::pair<Node, Node>(a, b), std::vector<Component>{});
     Branch B14 = Branch("14", std::pair<Node, Node>(b, a), std::vector<Component>{});
     Branch B15 = Branch("15", std::pair<Node, Node>(a, b), std::vector<Component>{});
-    const vector<Branch> grane = {B13,B14,B15};
+    const vector<Branch> grane = {B13, B14, B15};
     Circuit krug1;
     krug1.setBranches(grane);
     vector<Branch> stablo = krug1.getMinimumSpanningTree();
