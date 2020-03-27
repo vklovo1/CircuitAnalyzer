@@ -62,8 +62,47 @@ void Circuit::addComponent(Component component, string nodeNameFirst = "", strin
 
 void Circuit::simplifyCircuit() {
     for(int i = 0; i < branches.size(); i++) {
-        if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3) {
+        Node nodeToGetRidOf("");
+        if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3)
+            nodeToGetRidOf = branches[i].getFirstNode();
+        else if(getNumberOfBranchesFromNode(branches[i].getSecondNode()) < 3)
+            nodeToGetRidOf = branches[i].getSecondNode();
+        else continue;
 
+        auto branchesContainingNode = getBranchesContainingNode(nodeToGetRidOf);
+        auto firstBranch = branchesContainingNode[0];
+        auto secondBranch = branchesContainingNode[1];
+        Branch newBranch();
+        Node firstNode("");
+        Node secondNode("");
+
+        bool nodeToDeleteWasFirstInTheFirstBranch;
+        bool nodeToDeleteWasFirstInTheSecondBranch;
+
+        if(firstBranch.getFirstNode().getName() == nodeToGetRidOf.getName()) {
+            firstNode.setName(firstBranch.getSecondNode().getName());
+            nodeToDeleteWasFirstInTheFirstBranch = true;
+        } else {
+            firstNode.setName(firstBranch.getFirstNode().getName());
+            nodeToDeleteWasFirstInTheFirstBranch = false;
+        }
+
+        if(secondBranch.getFirstNode().getName() == nodeToGetRidOf.getName()) {
+            secondNode.setName(secondBranch.getSecondNode().getName());
+            nodeToDeleteWasFirstInTheSecondBranch = true;
+        } else {
+            secondNode.setName(secondBranch.getFirstNode().getName());
+            nodeToDeleteWasFirstInTheSecondBranch = false;
+        }
+
+        vector<Component> newBranchComponents(firstBranch.getComponents().size() + secondBranch.getComponents().size());
+
+        if(!nodeToDeleteWasFirstInTheFirstBranch) {
+            for (Component c : firstBranch.getComponents())
+                newBranchComponents.push_back(c);
+        } else {
+            for(Component c : firstBranch.getComponents()) {
+            }
         }
     }
 }
