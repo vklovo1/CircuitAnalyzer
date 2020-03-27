@@ -219,7 +219,10 @@ int main() {
     Branch B10 = Branch("10", std::pair<Node, Node>(e, b), std::vector<Component>{});
     Branch B11 = Branch("11", std::pair<Node, Node>(b, c), std::vector<Component>{});
     Branch B12 = Branch("12", std::pair<Node, Node>(b, f), std::vector<Component>{});
-    const vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
+    Branch B13 = Branch("13", std::pair<Node, Node>(a, b), std::vector<Component>{});
+    Branch B14 = Branch("14", std::pair<Node, Node>(b, a), std::vector<Component>{});
+    Branch B15 = Branch("15", std::pair<Node, Node>(a, b), std::vector<Component>{});
+    const vector<Branch> grane = {B13,B14,B15};
     Circuit krug1;
     krug1.setBranches(grane);
     vector<Branch> stablo = krug1.getMinimumSpanningTree();
