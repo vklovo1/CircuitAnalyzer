@@ -11,6 +11,8 @@ using std::vector;
 
 const double EPSILON = 10e-7;
 
+enum class TypeOfComponent {RESISTOR, VOLTAGE_SOURCE, CURRENT_SOURCE, VOLTMETER, AMPERMETER};
+
 class Component {
     string name;
 public:
@@ -23,6 +25,8 @@ public:
     const string &getName() const {
         return name;
     }
+
+    static TypeOfComponent instanceOf(std::shared_ptr<Component> c);
 };
 
 class Source: public Component {

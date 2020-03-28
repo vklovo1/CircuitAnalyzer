@@ -104,6 +104,7 @@ void Circuit::simplifyCircuit() {
                 newBranchComponents.push_back(c);
         } else {
             for(auto c : firstBranch.getComponents()) {
+                if(!)
             }
         }
     }
