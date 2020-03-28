@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <memory>
 
 
 using std::string;
@@ -215,18 +216,14 @@ class Branch {
     double current;
     string name;
     pair<Node, Node> nodes;
-    vector<Component> components;
+    vector<std::shared_ptr<Component>> components;
 
 public:
-    Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components) {}
-
-
+    Branch(string name, const pair<Node, Node> &nodes, vector<std::shared_ptr<Component>> components) : name(name), nodes(nodes), components(std::move(components)) {}
 
     const string &getName() const {
         return name;
     }
-
-
 
     void setName(const string &name) {
         Branch::name = name;
@@ -264,29 +261,27 @@ public:
         nodes.second = node;
     }
 
-    vector<Component> &getComponents() {
+    vector<std::shared_ptr<Component>> getComponents() {
         return components;
     }
 
-    void setComponents(const vector<Component> &components) {
+    void setComponents(vector<std::shared_ptr<Component>> components) {
         Branch::components = components;
     }
 
-    void addComponent(const Component &component) {
-        components.push_back(component);
+    void addComponent(std::shared_ptr<Component> component) {
+        std::shared_ptr<Component> c = std::move(component);
     }
 
-    void removeComponent(const Component &component) {
+    void removeComponent(std::shared_ptr<Component> component) {
         for(int i = 0; i < components.size(); i++) {
-            if (components.at(i).getName() == component.getName()) {
+            if (components.at(i)->getName() == component->getName()) {
                 components.erase(components.begin() + i);
                 break;
             }
         }
     }
 };
-
 //int main() {
-
-
+//return 0;
 //}
