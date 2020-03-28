@@ -298,6 +298,22 @@ public:
             }
         }
     }
+
+    friend bool operator == (const Branch &b1, const Branch &b2) {
+        return b1.getName() == b2.getName();
+    }
+
+    friend bool operator != (const Branch &b1, const Branch &b2) {
+        return !(b1 == b2);
+    }
+
+    friend bool operator < (const Branch &b1, const Branch &b2) {
+        return std::stoi(b1.getName().substr(1, string::npos)) < std::stoi(b2.getName().substr(1, string::npos));
+    }
+
+    friend bool operator <= (const Branch &b1, const Branch &b2) {
+        return b1 < b2 || b1 == b2;
+    }
 };
 //int main() {
 //return 0;
