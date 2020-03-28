@@ -77,7 +77,7 @@ int Circuit::getNumberOfBranches() {
 }
 
 int Circuit::getNumberOfNodes() {
-    return 0;
+    return getNumberOfBranches()-1;
 }
 
 bool Circuit::isVisited(Node nodeToCheck, vector<Node> visited_nodes) {
@@ -193,6 +193,13 @@ vector<vector<Branch>> Circuit::getLoops() {
     }
     return loops;
 }
+vector<double> Circuit::firstKirchhoffRule(){
+    int numberOfNodes=getNumberOfNodes();
+
+
+
+}
+
 
 int main() {
     Node a("A");

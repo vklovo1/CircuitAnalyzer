@@ -49,6 +49,7 @@ public:
 
     bool isBranchInTheTree(Branch branchToCheck);
 
+    vector<double> firstKirchhoffRule();
 };
 
 
