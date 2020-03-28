@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <utility>
 
 
 using std::string;
@@ -202,6 +203,22 @@ public:
 
     virtual void setVoltage(double voltage) {
         Node::voltage = voltage;
+    }
+
+    friend bool operator == (const Node &n1, const Node &n2) {
+        return n1.getName() == n2.getName();
+    }
+
+    friend bool operator != (const Node &n1, const Node &n2) {
+        return !(n1 == n2);
+    }
+
+    friend bool operator < (const Node &n1, const Node &n2) {
+        return std::stoi(n1.getName().substr(1, string::npos)) < std::stoi(n2.getName().substr(1, string::npos));
+    }
+
+    friend bool operator <= (const Node &n1, const Node &n2) {
+        return n1 < n2 || n1 == n2;
     }
 };
 
