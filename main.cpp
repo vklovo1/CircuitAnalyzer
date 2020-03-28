@@ -185,6 +185,7 @@ class Node {
 
 
 public:
+    Node();
     Node(const string &name) : name(name) {}
 
     const string &getName() const {

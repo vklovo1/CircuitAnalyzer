@@ -77,7 +77,7 @@ int Circuit::getNumberOfBranches() {
 }
 
 int Circuit::getNumberOfNodes() {
-    return getNumberOfBranches()-1;
+    return getNumberOfBranches() - 1;
 }
 
 bool Circuit::isVisited(Node nodeToCheck, vector<Node> visited_nodes) {
@@ -193,11 +193,51 @@ vector<vector<Branch>> Circuit::getLoops() {
     }
     return loops;
 }
-vector<double> Circuit::firstKirchhoffRule(){
-    int numberOfNodes=getNumberOfNodes();
 
+bool Circuit::doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode) {
+    for (auto b:branchesContainingNode) {
+        if (b.getName() == branchToCheck.getName()) return true;
+    }
+    return false;
+}
 
+vector<Node> Circuit::getNodes() {
+    vector<Node> nodesInTheCircuit;
+    vector<Node> visitedNodes;
+    Node currentNode = branches[0].getFirstNode();
+    nodesInTheCircuit.push_back(currentNode);
+    visitedNodes.push_back(currentNode);
+    for (auto b:branches) {
+        if (!isVisited(b.getFirstNode(), visitedNodes)) {
+            currentNode = b.getFirstNode();
+            nodesInTheCircuit.push_back(currentNode);
+            visitedNodes.push_back(currentNode);
+        } else if (!isVisited(b.getSecondNode(), visitedNodes)) {
+            currentNode = b.getSecondNode();
+            nodesInTheCircuit.push_back(currentNode);
+            visitedNodes.push_back(currentNode);
 
+        }
+    }
+
+    return nodesInTheCircuit;
+}
+
+vector<vector<int>> Circuit::firstKirchhoffRule() {
+    int numberOfNodes = getNumberOfNodes();
+    vector<vector<int>> matrixOfCurrents;
+    vector<Branch> branchesContainingNode;
+    vector<int> currentEquation;
+    vector<Node> visitedNodes;
+    vector<Node> nodesInTheCircuit = getNodes();
+    for (auto n:nodesInTheCircuit) {
+        currentEquation.clear();
+        branchesContainingNode = getBranchesContainingNode(n);
+        for (auto b:branches)
+            currentEquation.push_back(doesNodeContainBranch(b, branchesContainingNode) ? 1 : 0);
+        matrixOfCurrents.push_back(currentEquation);
+    }
+    return matrixOfCurrents;
 }
 
 
@@ -224,27 +264,46 @@ int main() {
     Branch B13 = Branch("13", std::pair<Node, Node>(a, b), std::vector<Component>{});
     Branch B14 = Branch("14", std::pair<Node, Node>(b, a), std::vector<Component>{});
     Branch B15 = Branch("15", std::pair<Node, Node>(a, b), std::vector<Component>{});
-    const vector<Branch> grane = {B13, B14, B15};
+    const vector<Branch> grane = {B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12};
     Circuit krug1;
     krug1.setBranches(grane);
+    //TEST ZA KONTURU
     vector<Branch> stablo = krug1.getMinimumSpanningTree();
-    vector<Branch> slobodnaGrana = krug1.getFreeBranches();
-    vector<vector<Branch>> konture = krug1.getLoops();
     std::cout << "Stablo je";
     for (int i = 0; i < stablo.size(); i++) {
         std::cout << stablo[i].getName() << ", ";
     }
-    std::cout << " broj " << stablo.size() << std::endl;
+    //TEST SLOBODNIH GRANA
+    vector<Branch> slobodnaGrana = krug1.getFreeBranches();
+    std::cout << std::endl << "Slobodne grane: ";
     for (int i = 0; i < slobodnaGrana.size(); i++) {
         std::cout << slobodnaGrana[i].getName() << ", ";
     }
+    //TEST KONTURA
+    vector<vector<Branch>> konture = krug1.getLoops();
+    std::cout << std::endl << "Konture :";
     for (int i = 0; i < konture.size(); i++) {
         std::cout << std::endl;
         for (int j = 0; j < konture[i].size(); j++) {
             std::cout << konture[i][j].getName() << " ";
         }
     }
-
+    //TEST CVOROVA
+    vector<Node> cvorovi = krug1.getNodes();
+    std::cout << std::endl;
+    for (auto c:cvorovi) {
+        std::cout << c.getName() << ", ";
+    }
+    std::cout << std::endl;
+    //TEST 1 KZ
+    std::cout << "Matrica za prvi KZ:" << std::endl;
+    vector<vector<int>> matricaStruja = krug1.firstKirchhoffRule();
+    int x=0;
+    for (auto i:matricaStruja) {
+        for (auto j:i)
+            std::cout << j << ", ";
+        std::cout << std::endl;
+    }
 }
 
 

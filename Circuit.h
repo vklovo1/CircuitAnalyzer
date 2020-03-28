@@ -17,6 +17,7 @@ class Circuit {
     int numberOfNodes;
 public:
     Circuit();
+
     Circuit(const vector<Branch> &branches);
 
     const vector<Branch> &getBranches() const;
@@ -49,7 +50,11 @@ public:
 
     bool isBranchInTheTree(Branch branchToCheck);
 
-    vector<double> firstKirchhoffRule();
+    vector<vector<int>> firstKirchhoffRule();
+
+    bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
+
+    vector<Node> getNodes();
 };
 
 
