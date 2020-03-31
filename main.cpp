@@ -191,6 +191,7 @@ class Node {
 
 
 public:
+    Node();
     Node(const string &name) : name(name) {}
 
     const string &getName() const {
@@ -240,6 +241,7 @@ class Branch {
     vector<std::shared_ptr<Component>> components;
 
 public:
+  
     Branch(string name, const pair<Node, Node> &nodes, vector<std::shared_ptr<Component>> components) : name(name), nodes(nodes), components(std::move(components)) {}
 
     const string &getName() const {

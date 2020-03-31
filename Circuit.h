@@ -35,13 +35,25 @@ public:
 
     int getNumberOfBranchesFromNode(Node node);
 
-    void addComponent(std::shared_ptr<Component> component, string nodeNameFirst, string nodeNameSecond);
-
-    vector<Branch> getMinimumSpanningTree(Node startingNode);
-
     vector<Branch> getBranchesContainingNode(Node node);
 
     bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
+
+    vector<Branch> getMinimumSpanningTree();
+  
+    void addComponent(std::shared_ptr<Component> component, string nodeNameFirst, string nodeNameSecond);
+
+    vector<vector<Branch>> getLoops();
+
+    vector<Branch> getFreeBranches();
+
+    bool isBranchInTheTree(Branch branchToCheck);
+
+    vector<vector<int>> firstKirchhoffRule();
+
+    bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
+
+    vector<Node> getNodes();
 
     void simplifyCircuit();
 

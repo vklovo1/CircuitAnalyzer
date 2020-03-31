@@ -131,7 +131,7 @@ int Circuit::getNumberOfBranches() {
 }
 
 int Circuit::getNumberOfNodes() {
-    return 0;
+    return getNumberOfBranches() - 1;
 }
 
 bool Circuit::isVisited(Node nodeToCheck, vector<Node> visited_nodes) {
@@ -142,7 +142,8 @@ bool Circuit::isVisited(Node nodeToCheck, vector<Node> visited_nodes) {
     return false;
 }
 
-vector<Branch> Circuit::getMinimumSpanningTree(Node startingNode) {
+vector<Branch> Circuit::getMinimumSpanningTree() {
+    Node startingNode = branches[0].getFirstNode();
     Node currentNode = startingNode;
     vector<Node> visitedNodes;
     vector<Branch> treeBranches;
@@ -172,10 +173,128 @@ vector<Branch> Circuit::getMinimumSpanningTree(Node startingNode) {
                 }
             }
         }
+
+
     }
+
     return treeBranches;
 }
 
+bool Circuit::isBranchInTheTree(Branch branchToCheck) {
+    vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
+    for (int i = 0; i < minimumSpanningTree.size(); i++) {
+        if (branchToCheck.getName() == minimumSpanningTree[i].getName())return true;
+    }
+    return false;
+}
+
+vector<Branch> Circuit::getFreeBranches() {
+    vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
+    vector<Branch> freeBranches;
+    bool branchInTheTree = false;
+    for (int i = 0; i < getNumberOfBranches(); i++) {
+        if (!isBranchInTheTree(branches[i]))freeBranches.push_back(branches[i]);
+    }
+    return freeBranches;
+}
+
+
+vector<vector<Branch>> Circuit::getLoops() {
+    vector<Branch> currentLoop;
+    vector<Branch> freeBranches = getFreeBranches();
+    vector<Branch> branchesContainingNode;
+    vector<Node> visitedNodes;
+    bool goBack = false;
+    Node endingNode = freeBranches[0].getSecondNode();
+    Node currentNode = freeBranches[0].getFirstNode();;
+    std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
+    vector<vector<Branch>> loops; //Matrix of branches with each row containing branches that enter one loop
+    for (int i = 0; i < freeBranches.size(); i++) {
+        currentNode = freeBranches[i].getFirstNode();
+        endingNode = freeBranches[i].getSecondNode();
+        currentLoop.push_back(freeBranches[i]);
+        visitedNodes.clear();
+        while (true) {
+            if (goBack) {
+                currentNode = orderOfVisitedNodes.top();
+                orderOfVisitedNodes.pop();
+                currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
+            }
+            visitedNodes.push_back(currentNode);
+            if (currentNode.getName() == endingNode.getName())break;
+            branchesContainingNode = this->getBranchesContainingNode(currentNode);
+            goBack = false;
+            for (int j = 0; j < branchesContainingNode.size(); j++) {
+                if (isBranchInTheTree(branchesContainingNode[j])) {
+
+                    if (!isVisited(branchesContainingNode[j].getFirstNode(), visitedNodes)) {
+                        orderOfVisitedNodes.push(currentNode);
+                        currentNode = branchesContainingNode[j].getFirstNode();
+                        currentLoop.push_back(branchesContainingNode[j]);
+                        break;
+                    } else if (!isVisited(branchesContainingNode[j].getSecondNode(), visitedNodes)) {
+                        orderOfVisitedNodes.push(currentNode);
+                        currentNode = branchesContainingNode[j].getSecondNode();
+                        currentLoop.push_back(branchesContainingNode[j]);
+                        break;
+                    }
+                }
+                if (j == branchesContainingNode.size() - 1)
+                    goBack = true; //dead end - no tree branches to connect the loop, go back
+            
+        }
+        loops.push_back(currentLoop);
+        currentLoop.clear();
+    }
+    return loops;
+}
+
+bool Circuit::doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode) {
+    for (auto b:branchesContainingNode) {
+        if (b.getName() == branchToCheck.getName()) return true;
+    }
+    return false;
+}
+
+vector<Node> Circuit::getNodes() {
+    vector<Node> nodesInTheCircuit;
+    vector<Node> visitedNodes;
+    Node currentNode = branches[0].getFirstNode();
+    nodesInTheCircuit.push_back(currentNode);
+    visitedNodes.push_back(currentNode);
+    for (auto b:branches) {
+        if (!isVisited(b.getFirstNode(), visitedNodes)) {
+            currentNode = b.getFirstNode();
+            nodesInTheCircuit.push_back(currentNode);
+            visitedNodes.push_back(currentNode);
+        } else if (!isVisited(b.getSecondNode(), visitedNodes)) {
+            currentNode = b.getSecondNode();
+            nodesInTheCircuit.push_back(currentNode);
+            visitedNodes.push_back(currentNode);
+
+        }
+    }
+
+    return nodesInTheCircuit;
+}
+
+vector<vector<int>> Circuit::firstKirchhoffRule() {
+    int numberOfNodes = getNumberOfNodes();
+    vector<vector<int>> matrixOfCurrents;
+    vector<Branch> branchesContainingNode;
+    vector<int> currentEquation;
+    vector<Node> visitedNodes;
+    vector<Node> nodesInTheCircuit = getNodes();
+    for (auto n:nodesInTheCircuit) {
+        currentEquation.clear();
+        branchesContainingNode = getBranchesContainingNode(n);
+        for (auto b:branches)
+            currentEquation.push_back(doesNodeContainBranch(b, branchesContainingNode) ? 1 : 0);
+        matrixOfCurrents.push_back(currentEquation);
+    }
+    return matrixOfCurrents;
+}
+  
 int main() {
     Node a("A");
     Node b("B");
@@ -184,29 +303,63 @@ int main() {
     Node e("E");
     Node f("F");
     Node g("G");
-    Branch B1 = Branch("1", std::pair<Node, Node>(a, f), std::vector<std::shared_ptr<Component>>{});
-    Branch B2 = Branch("2", std::pair<Node, Node>(f, c), std::vector<std::shared_ptr<Component>>{});
-    Branch B3 = Branch("3", std::pair<Node, Node>(c, e), std::vector<std::shared_ptr<Component>>{});
-    Branch B4 = Branch("4", std::pair<Node, Node>(e, g), std::vector<std::shared_ptr<Component>>{});
-    Branch B5 = Branch("5", std::pair<Node, Node>(g, d), std::vector<std::shared_ptr<Component>>{});
-    Branch B6 = Branch("6", std::pair<Node, Node>(d, a), std::vector<std::shared_ptr<Component>>{});
-    Branch B7 = Branch("7", std::pair<Node, Node>(a, b), std::vector<std::shared_ptr<Component>>{});
-    Branch B8 = Branch("8", std::pair<Node, Node>(b, d), std::vector<std::shared_ptr<Component>>{});
-    Branch B9 = Branch("9", std::pair<Node, Node>(d, e), std::vector<std::shared_ptr<Component>>{});
-    Branch B10 = Branch("10", std::pair<Node, Node>(e, b), std::vector<std::shared_ptr<Component>>{});
-    Branch B11 = Branch("11", std::pair<Node, Node>(b, c), std::vector<std::shared_ptr<Component>>{});
-    Branch B12 = Branch("12", std::pair<Node, Node>(b, f), std::vector<std::shared_ptr<Component>>{});
-    const vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
+    Branch B1 = Branch("1", std::pair<Node, Node>(a, f), std::vector<Component>{});
+    Branch B2 = Branch("2", std::pair<Node, Node>(f, c), std::vector<Component>{});
+    Branch B3 = Branch("3", std::pair<Node, Node>(c, e), std::vector<Component>{});
+    Branch B4 = Branch("4", std::pair<Node, Node>(e, g), std::vector<Component>{});
+    Branch B5 = Branch("5", std::pair<Node, Node>(g, d), std::vector<Component>{});
+    Branch B6 = Branch("6", std::pair<Node, Node>(d, a), std::vector<Component>{});
+    Branch B7 = Branch("7", std::pair<Node, Node>(a, b), std::vector<Component>{});
+    Branch B8 = Branch("8", std::pair<Node, Node>(b, d), std::vector<Component>{});
+    Branch B9 = Branch("9", std::pair<Node, Node>(d, e), std::vector<Component>{});
+    Branch B10 = Branch("10", std::pair<Node, Node>(e, b), std::vector<Component>{});
+    Branch B11 = Branch("11", std::pair<Node, Node>(b, c), std::vector<Component>{});
+    Branch B12 = Branch("12", std::pair<Node, Node>(b, f), std::vector<Component>{});
+    Branch B13 = Branch("13", std::pair<Node, Node>(a, b), std::vector<Component>{});
+    Branch B14 = Branch("14", std::pair<Node, Node>(b, a), std::vector<Component>{});
+    Branch B15 = Branch("15", std::pair<Node, Node>(a, b), std::vector<Component>{});
+    const vector<Branch> grane = {B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12};
     Circuit krug1;
     krug1.setBranches(grane);
-    vector<Branch> stablo = krug1.getMinimumSpanningTree(a);
+    //TEST ZA KONTURU
+    vector<Branch> stablo = krug1.getMinimumSpanningTree();
     std::cout << "Stablo je";
     for (int i = 0; i < stablo.size(); i++) {
         std::cout << stablo[i].getName() << ", ";
     }
-    std::cout << " broj " << stablo.size();
-
+    //TEST SLOBODNIH GRANA
+    vector<Branch> slobodnaGrana = krug1.getFreeBranches();
+    std::cout << std::endl << "Slobodne grane: ";
+    for (int i = 0; i < slobodnaGrana.size(); i++) {
+        std::cout << slobodnaGrana[i].getName() << ", ";
+    }
+    //TEST KONTURA
+    vector<vector<Branch>> konture = krug1.getLoops();
+    std::cout << std::endl << "Konture :";
+    for (int i = 0; i < konture.size(); i++) {
+        std::cout << std::endl;
+        for (int j = 0; j < konture[i].size(); j++) {
+            std::cout << konture[i][j].getName() << " ";
+        }
+    }
+    //TEST CVOROVA
+    vector<Node> cvorovi = krug1.getNodes();
+    std::cout << std::endl;
+    for (auto c:cvorovi) {
+        std::cout << c.getName() << ", ";
+    }
+    std::cout << std::endl;
+    //TEST 1 KZ
+    std::cout << "Matrica za prvi KZ:" << std::endl;
+    vector<vector<int>> matricaStruja = krug1.firstKirchhoffRule();
+    int x=0;
+    for (auto i:matricaStruja) {
+        for (auto j:i)
+            std::cout << j << ", ";
+        std::cout << std::endl;
+    }
 }
+
 
 
 
