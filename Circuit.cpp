@@ -4,7 +4,11 @@
 
 #include "Circuit.h"
 
-Circuit::Circuit(const vector<Branch> &branches) : branches(branches) {}
+#include <utility>
+
+Circuit::Circuit(const vector<Branch> &branches)  {
+
+}
 
 Circuit::Circuit() {
     numberOfNodes = 0;
@@ -52,25 +56,75 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
     return numberOfBranches;
 }
 
-/*void Circuit::addComponent(Component component, string nodeNameFirst = "", string nodeNameSecond = "") {
-    if(branches.size() == 0) {
-        Node node1 = Node("N1");
-        Node node2 = Node("N2");
-        Branch branch1 = Branch("B1", std::pair<Node, Node>(node1, node2), std::vector<Component>{component});
-        addBranch(branch1);
-    } else {
-        int branchContainingNodeIndex = getIndexOfBranchOfNode(Node(nodeNameFirst));
-        if(branchContainingNodeIndex != -1) { //case1
+void Circuit::addComponent(std::shared_ptr<Component> component, string nodeNameFirst = "", string nodeNameSecond = "") {
+    Branch newBranch("B" + std::to_string(getNumberOfBranches()), std::pair<Node, Node>(Node(nodeNameFirst), Node(nodeNameSecond)),
+            vector<std::shared_ptr<Component>>{std::move(component)});
+    addBranch(newBranch);
+}
+
+void Circuit::simplifyCircuit() {
+    for(int i = 0; i < branches.size(); i++) {
+        Node nodeToGetRidOf("");
+        if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3)
+            nodeToGetRidOf = branches[i].getFirstNode();
+        else if(getNumberOfBranchesFromNode(branches[i].getSecondNode()) < 3)
+            nodeToGetRidOf = branches[i].getSecondNode();
+        else continue;
+
+        auto branchesContainingNode = getBranchesContainingNode(nodeToGetRidOf);
+        auto firstBranch = branchesContainingNode[0];
+        auto secondBranch = branchesContainingNode[1];
+        Branch newBranch();
+        Node firstNode("");
+        Node secondNode("");
+
+        bool nodeToDeleteWasFirstInTheFirstBranch;
+        bool nodeToDeleteWasFirstInTheSecondBranch;
+
+        if(firstBranch.getFirstNode().getName() == nodeToGetRidOf.getName()) {
+            firstNode.setName(firstBranch.getSecondNode().getName());
+            nodeToDeleteWasFirstInTheFirstBranch = true;
         } else {
-            branchContainingNodeIndex = getIndexOfBranchOfNode(Node(nodeNameSecond));
-            if(branchContainingNodeIndex != -1) { //case2
+            firstNode.setName(firstBranch.getFirstNode().getName());
+            nodeToDeleteWasFirstInTheFirstBranch = false;
+        }
 
-            } else { //case3
+        if(secondBranch.getFirstNode().getName() == nodeToGetRidOf.getName()) {
+            secondNode.setName(secondBranch.getSecondNode().getName());
+            nodeToDeleteWasFirstInTheSecondBranch = true;
+        } else {
+            secondNode.setName(secondBranch.getFirstNode().getName());
+            nodeToDeleteWasFirstInTheSecondBranch = false;
+        }
 
+        vector<std::shared_ptr<Component>> newBranchComponents(firstBranch.getComponents().size() + secondBranch.getComponents().size());
+
+        if(!nodeToDeleteWasFirstInTheFirstBranch) {
+            for (auto c : firstBranch.getComponents())
+                newBranchComponents.push_back(c);
+        } else {
+            for(auto c : firstBranch.getComponents()) {
+                if(!)
             }
         }
     }
-}*/
+}
+
+void Circuit::drawWire(string nodeNameFirst, string nodeNameSecond) {
+    int firstNodeIndex = std::stoi(nodeNameFirst.substr(1, string::npos));
+    int secondNodeIndex = std::stoi(nodeNameSecond.substr(1, string::npos));
+
+    string lesserIndexNodeName;
+    if(firstNodeIndex < secondNodeIndex) lesserIndexNodeName = nodeNameFirst;
+    else lesserIndexNodeName = nodeNameSecond;
+
+    for(Branch b : branches) {
+        if(b.getFirstNode().getName() == nodeNameSecond)
+            b.setFirstNode(Node(lesserIndexNodeName));
+        else if(b.getSecondNode().getName() == nodeNameSecond)
+            b.setSecondNode(Node(lesserIndexNodeName));
+    }
+}
 
 int Circuit::getNumberOfBranches() {
     return branches.size();
@@ -82,7 +136,8 @@ int Circuit::getNumberOfNodes() {
 
 bool Circuit::isVisited(Node nodeToCheck, vector<Node> visited_nodes) {
     for (int i = 0; i < visited_nodes.size(); i++) {
-        if (nodeToCheck.getName() == visited_nodes[i].getName())return true;
+        if (nodeToCheck.getName() == visited_nodes[i].getName())
+            return true;
     }
     return false;
 }
@@ -186,7 +241,7 @@ vector<vector<Branch>> Circuit::getLoops() {
                 }
                 if (j == branchesContainingNode.size() - 1)
                     goBack = true; //dead end - no tree branches to connect the loop, go back
-            }
+            
         }
         loops.push_back(currentLoop);
         currentLoop.clear();
@@ -239,8 +294,7 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
     }
     return matrixOfCurrents;
 }
-
-
+  
 int main() {
     Node a("A");
     Node b("B");
