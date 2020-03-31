@@ -587,7 +587,7 @@ public:
         nodes.second = node;
     }
 
-    vector<std::shared_ptr<Component>> getComponents() {
+    vector<std::shared_ptr<Components>> getComponents() {
         return components;
     }
 
