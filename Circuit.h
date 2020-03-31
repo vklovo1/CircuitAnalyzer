@@ -9,14 +9,15 @@
 #include <vector>
 #include "main.cpp"
 #include <stack>
+#include <memory>
 
 class Circuit {
-
-
-    std::vector<Branch> branches;
+    vector<Branch> branches;
     int numberOfNodes;
+
 public:
     Circuit();
+
     Circuit(const vector<Branch> &branches);
 
     const vector<Branch> &getBranches() const;
@@ -31,19 +32,20 @@ public:
 
     int getNumberOfNodes();
 
-    void addComponent(Component component, int coordinateX, int coordinateY);
-
-    void addComponent(Component component, string nodeNameFirst, string nodeNameSecond);
 
     int getNumberOfBranchesFromNode(Node node);
 
+    void addComponent(std::shared_ptr<Component> component, string nodeNameFirst, string nodeNameSecond);
 
-
-    vector<Branch> MinimumSpanningTree(Node startingNode);
+    vector<Branch> getMinimumSpanningTree(Node startingNode);
 
     vector<Branch> getBranchesContainingNode(Node node);
 
     bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
+
+    void simplifyCircuit();
+
+    void drawWire(string nodeNameFirst, string nodeNameSecond);
 };
 
 

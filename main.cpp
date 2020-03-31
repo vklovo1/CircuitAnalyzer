@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <memory>
+#include <utility>
 
 
 using std::string;
@@ -8,6 +10,8 @@ using std::pair;
 using std::vector;
 
 const double EPSILON = 10e-7;
+
+enum class TypeOfComponent {RESISTOR, VOLTAGE_SOURCE, CURRENT_SOURCE, VOLTMETER, AMPERMETER};
 
 class Component {
     string name;
@@ -21,6 +25,8 @@ public:
     const string &getName() const {
         return name;
     }
+
+    static TypeOfComponent instanceOf(std::shared_ptr<Component> c);
 };
 
 class Source: public Component {
@@ -202,6 +208,22 @@ public:
     virtual void setVoltage(double voltage) {
         Node::voltage = voltage;
     }
+
+    friend bool operator == (const Node &n1, const Node &n2) {
+        return n1.getName() == n2.getName();
+    }
+
+    friend bool operator != (const Node &n1, const Node &n2) {
+        return !(n1 == n2);
+    }
+
+    friend bool operator < (const Node &n1, const Node &n2) {
+        return std::stoi(n1.getName().substr(1, string::npos)) < std::stoi(n2.getName().substr(1, string::npos));
+    }
+
+    friend bool operator <= (const Node &n1, const Node &n2) {
+        return n1 < n2 || n1 == n2;
+    }
 };
 
 class Ground : public Node {
@@ -215,18 +237,14 @@ class Branch {
     double current;
     string name;
     pair<Node, Node> nodes;
-    vector<Component> components;
+    vector<std::shared_ptr<Component>> components;
 
 public:
-    Branch(string name, const pair<Node, Node> &nodes, const vector<Component> &components) : name(name), nodes(nodes), components(components) {}
-
-
+    Branch(string name, const pair<Node, Node> &nodes, vector<std::shared_ptr<Component>> components) : name(name), nodes(nodes), components(std::move(components)) {}
 
     const string &getName() const {
         return name;
     }
-
-
 
     void setName(const string &name) {
         Branch::name = name;
@@ -264,29 +282,43 @@ public:
         nodes.second = node;
     }
 
-    vector<Component> &getComponents() {
+    vector<std::shared_ptr<Component>> getComponents() {
         return components;
     }
 
-    void setComponents(const vector<Component> &components) {
+    void setComponents(vector<std::shared_ptr<Component>> components) {
         Branch::components = components;
     }
 
-    void addComponent(const Component &component) {
-        components.push_back(component);
+    void addComponent(std::shared_ptr<Component> component) {
+        std::shared_ptr<Component> c = std::move(component);
     }
 
-    void removeComponent(const Component &component) {
+    void removeComponent(std::shared_ptr<Component> component) {
         for(int i = 0; i < components.size(); i++) {
-            if (components.at(i).getName() == component.getName()) {
+            if (components.at(i)->getName() == component->getName()) {
                 components.erase(components.begin() + i);
                 break;
             }
         }
     }
+
+    friend bool operator == (const Branch &b1, const Branch &b2) {
+        return b1.getName() == b2.getName();
+    }
+
+    friend bool operator != (const Branch &b1, const Branch &b2) {
+        return !(b1 == b2);
+    }
+
+    friend bool operator < (const Branch &b1, const Branch &b2) {
+        return std::stoi(b1.getName().substr(1, string::npos)) < std::stoi(b2.getName().substr(1, string::npos));
+    }
+
+    friend bool operator <= (const Branch &b1, const Branch &b2) {
+        return b1 < b2 || b1 == b2;
+    }
 };
-
 //int main() {
-
-
+//return 0;
 //}
