@@ -46,7 +46,7 @@ public:
     void setVoltage(double voltage) {
         if(voltage < 0) {
             voltage *= -1;
-            this->naturalOrientation = !this->naturalOrientation;
+            toggleOrientation();
         }
         this->voltage = voltage;
     }
@@ -273,7 +273,7 @@ public:
         return r1 < r2 || r1 == r2;
     }
 
-    Resistor &operator +=(const Resistor &r) { //sources in series
+    Resistor &operator +=(const Resistor &r) { //resistors in series
         this->resistance += r.resistance;
         return *this;
     }

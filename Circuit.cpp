@@ -211,9 +211,9 @@ vector<vector<Branch>> Circuit::getLoops() {
     vector<Branch> branchesContainingNode;
     vector<Node> visitedNodes;
     bool goBack = false;
-    Node endingNode = freeBranches[0].getSecondNode();
-    Node currentNode = freeBranches[0].getFirstNode();;
-    std::stack<Node> orderOfVisitedNodes; // redom ubacujem cvorove koje uzimam LIFO
+    Node endingNode;
+    Node currentNode;
+    std::stack<Node> orderOfVisitedNodes;
     vector<vector<Branch>> loops; //Matrix of branches with each row containing branches that enter one loop
     for (int i = 0; i < freeBranches.size(); i++) {
         currentNode = freeBranches[i].getFirstNode();
@@ -262,37 +262,17 @@ bool Circuit::doesNodeContainBranch(Branch branchToCheck, vector<Branch> branche
     return false;
 }
 
-/*vector<Node> Circuit::getNodes() {
-    vector<Node> nodesInTheCircuit;
-    vector<Node> visitedNodes;
-    Node currentNode = branches[0].getFirstNode();
-    nodesInTheCircuit.push_back(currentNode);
-    visitedNodes.push_back(currentNode);
-    for (auto b:branches) {
-        if (!isNodeInNodeVector(b.getFirstNode(), visitedNodes)) {
-            currentNode = b.getFirstNode();
-            nodesInTheCircuit.push_back(currentNode);
-            visitedNodes.push_back(currentNode);
-        } else if (!isNodeInNodeVector(b.getSecondNode(), visitedNodes)) {
-            currentNode = b.getSecondNode();
-            nodesInTheCircuit.push_back(currentNode);
-            visitedNodes.push_back(currentNode);
-        }
-    }
-    return nodesInTheCircuit;
-}*/
-
 vector<vector<int>> Circuit::firstKirchhoffRule() {
     int numberOfNodes = getNumberOfNodes();
     vector<vector<int>> matrixOfCurrents;
     vector<Branch> branchesContainingNode;
     vector<int> currentEquation;
     vector<Node> visitedNodes;
-    vector<Node> nodesInTheCircuit = getNodes();
-    for (auto n:nodesInTheCircuit) {
+    std::set<Node> nodesInTheCircuit = getNodes();
+    for (auto n : nodesInTheCircuit) {
         currentEquation.clear();
         branchesContainingNode = getBranchesContainingNode(n);
-        for (auto b:branches)
+        for (auto b : branches)
             currentEquation.push_back(doesNodeContainBranch(b, branchesContainingNode) ? 1 : 0);
         matrixOfCurrents.push_back(currentEquation);
     }
