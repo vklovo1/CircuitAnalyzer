@@ -1,13 +1,13 @@
 #include <iostream>
 #include <cmath>
-#include <vector>
 #include <memory>
 #include <utility>
+#include <forward_list>
 
 
 using std::string;
 using std::pair;
-using std::vector;
+using std::forward_list;
 
 const double EPSILON = 10e-7;
 
@@ -224,11 +224,12 @@ public:
     }
 };
 
+//Resistor has an id of -1 by default... this indicates a parasite resistance from sources or instruments
 class Resistor {
     int id;
     double resistance;
 public:
-    Resistor(int id, double resistance){
+    Resistor(double resistance = 100, int id = -1){
         setId(id);
         setResistance(resistance);
     }
@@ -240,7 +241,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0)
+        if(id < 0 && id != -1)
             throw std::domain_error("IDs start at 0!");
         Resistor::id = id;
     }
@@ -541,18 +542,31 @@ public:
 class Branch {
     int id;
     pair<Node, Node> nodes;
-    vector<std::shared_ptr<Component>> components;
+    forward_list<Resistor> resistors;
+    forward_list<VoltageSource> voltageSources;
+    forward_list<CurrentSource> currentSources;
     double current;
 public:
-  
-    Branch(string name, const pair<Node, Node> &nodes, vector<std::shared_ptr<Component>> components) : name(name), nodes(nodes), components(std::move(components)) {}
 
-    const string &getName() const {
-        return name;
+    Branch(int id, const Node &n1, const Node &n2, const forward_list<Resistor> &resistors, const forward_list <VoltageSource> &voltageSources,
+           const forward_list <CurrentSource> &currentSources) {
+        setId(id);
+        setNodes(n1, n2);
+        this->resistors = resistors;
+        this->voltageSources = voltageSources;
+        this->currentSources = currentSources;
     }
 
-    void setName(const string &name) {
-        Branch::name = name;
+    //getters and setters
+
+    int getId() const {
+        return id;
+    }
+
+    void setId(int id) {
+        if(id < 0)
+            throw std::range_error("IDs start at 0!");
+        Branch::id = id;
     }
 
     double getCurrent() const {
@@ -563,12 +577,8 @@ public:
         Branch::current = current;
     }
 
-    pair<Node, Node> &getNodes() {
-        return nodes;
-    }
-
-    void setNodes(const pair<Node, Node> &nodes) {
-        Branch::nodes = nodes;
+    void setNodes(const Node &n1, const Node &n2) {
+        this->nodes = pair<Node, Node>(n1, n2);
     }
 
     const Node &getFirstNode() const {
@@ -587,29 +597,36 @@ public:
         nodes.second = node;
     }
 
-    vector<std::shared_ptr<Components>> getComponents() {
-        return components;
+    //utility
+
+    bool hasResistors() {
+        return !resistors.empty();
     }
 
-    void setComponents(vector<std::shared_ptr<Component>> components) {
-        Branch::components = components;
+    bool hasVoltageSources() {
+        return !voltageSources.empty();
     }
 
-    void addComponent(std::shared_ptr<Component> component) {
-        std::shared_ptr<Component> c = std::move(component);
+    bool hasCurrentSources() {
+        return !currentSources.empty();
     }
 
-    void removeComponent(std::shared_ptr<Component> component) {
-        for(int i = 0; i < components.size(); i++) {
-            if (components.at(i)->getName() == component->getName()) {
-                components.erase(components.begin() + i);
-                break;
-            }
-        }
+    bool isEmpty() {
+        return resistors.empty() && voltageSources.empty() && currentSources.empty();
     }
+
+    bool isLoop() {
+        return nodes.first == nodes.second;
+    }
+
+    bool isEmptyLoop() {
+        return isLoop() && isEmpty();
+    }
+
+    //operators
 
     friend bool operator == (const Branch &b1, const Branch &b2) {
-        return b1.getName() == b2.getName();
+        return b1.getId() == b2.getId();
     }
 
     friend bool operator != (const Branch &b1, const Branch &b2) {
@@ -617,7 +634,7 @@ public:
     }
 
     friend bool operator < (const Branch &b1, const Branch &b2) {
-        return std::stoi(b1.getName().substr(1, string::npos)) < std::stoi(b2.getName().substr(1, string::npos));
+        return b1.getId() < b2.getId();
     }
 
     friend bool operator <= (const Branch &b1, const Branch &b2) {
