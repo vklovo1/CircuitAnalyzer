@@ -10,6 +10,10 @@
 #include "main.cpp"
 #include <stack>
 #include <memory>
+#include <utility>
+#include <set>
+
+using std::vector;
 
 class Circuit {
     vector<Branch> branches;
@@ -37,27 +41,25 @@ public:
 
     vector<Branch> getBranchesContainingNode(Node node);
 
-    bool isVisited(Node nodeToCheck, vector<Node> visited_nodes);
+    bool isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes);
 
     vector<Branch> getMinimumSpanningTree();
-  
-    void addComponent(std::shared_ptr<Component> component, string nodeNameFirst, string nodeNameSecond);
 
     vector<vector<Branch>> getLoops();
 
-    vector<Branch> getFreeBranches();
+    vector<Branch> getCoTree();
 
     bool isBranchInTheTree(Branch branchToCheck);
 
     vector<vector<int>> firstKirchhoffRule();
 
-    bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
+    static bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
 
-    vector<Node> getNodes();
+    std::set<Node> getNodes();
 
     void simplifyCircuit();
 
-    void drawWire(string nodeNameFirst, string nodeNameSecond);
+    void drawWire(int firstNodeID, int secondNodeID);
 };
 
 

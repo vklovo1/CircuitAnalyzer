@@ -525,7 +525,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Node &n)
     {
-        os << "N" << n.getId() << " " << n.getId() << "V";
+        os << "N" << n.getId() << " " << n.getVoltage() << "V";
         return os;
     }
 };
@@ -556,6 +556,16 @@ public:
         this->voltageSources = voltageSources;
         this->currentSources = currentSources;
     }
+
+    Branch(int id, const Node &n1, const Node &n2) {
+        setId(id);
+        setNodes(n1, n2);
+        resistors = forward_list<Resistor>();
+        voltageSources = forward_list<VoltageSource>();
+        currentSources = forward_list<CurrentSource>();
+    }
+
+    Branch() {}
 
     //getters and setters
 
@@ -639,6 +649,12 @@ public:
 
     friend bool operator <= (const Branch &b1, const Branch &b2) {
         return b1 < b2 || b1 == b2;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Branch &b)
+    {
+        os << "B" << b.getId() << " " << b.getCurrent() << "A";
+        return os;
     }
 };
 //int main() {
