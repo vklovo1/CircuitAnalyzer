@@ -41,7 +41,7 @@ public:
 
     vector<Branch> getBranchesContainingNode(Node node);
 
-    bool isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes);
+    static bool isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes);
 
     vector<Branch> getMinimumSpanningTree();
 
@@ -52,8 +52,6 @@ public:
     bool isBranchInTheTree(Branch branchToCheck);
 
     vector<vector<int>> firstKirchhoffRule();
-
-    static bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
 
     std::set<Node> getNodes();
 
@@ -68,6 +66,12 @@ public:
     void addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID);
 
     void addCurrentSourceToCircuit(CurrentSource V, int firstNodeID, int secondNodeID);
+
+    vector<Branch> &getBranches();
+
+    friend std::ostream &operator<<(std::ostream &os, const Circuit &C);
+
+    static bool nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
 };
 
 

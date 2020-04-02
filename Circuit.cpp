@@ -19,6 +19,10 @@ const vector<Branch> &Circuit::getBranches() const {
     return branches;
 }
 
+vector<Branch> &Circuit::getBranches() {
+    return branches;
+}
+
 void Circuit::setBranches(const vector<Branch> &branches) {
     Circuit::branches = branches;
 }
@@ -38,10 +42,9 @@ void Circuit::removeBranch(const Branch &branch) {
 
 vector<Branch> Circuit::getBranchesContainingNode(Node node) {
     vector<Branch> branchesContainingNode;
-    for (int i = 0; i < branches.size(); i++) {
-        if (branches[i].getFirstNode() == node || branches[i].getSecondNode() == node)
-            branchesContainingNode.push_back(branches[i]);
-    }
+    for (auto &b : branches)
+        if (b.getFirstNode() == node || b.getSecondNode() == node)
+            branchesContainingNode.push_back(b);
     return branchesContainingNode;
 }
 
@@ -59,12 +62,12 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
 //this method removes obsolete branches that are actually in series
 
 void Circuit::removeObsoleteBranches() {
-    for(int i = 0; i < branches.size(); i++) {
+    for(auto &b : branches) {
         Node nodeToGetRidOf;
-        if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3)
-            nodeToGetRidOf = branches[i].getFirstNode();
-        else if(getNumberOfBranchesFromNode(branches[i].getSecondNode()) < 3)
-            nodeToGetRidOf = branches[i].getSecondNode();
+        if(getNumberOfBranchesFromNode(b.getFirstNode()) < 3)
+            nodeToGetRidOf = b.getFirstNode();
+        else if(getNumberOfBranchesFromNode(b.getSecondNode()) < 3)
+            nodeToGetRidOf = b.getSecondNode();
         else continue;
 
         auto branchesContainingNode = getBranchesContainingNode(nodeToGetRidOf);
@@ -228,8 +231,9 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
 
 bool Circuit::isBranchInTheTree(Branch branchToCheck) {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
-    for (int i = 0; i < minimumSpanningTree.size(); i++) {
-        if (branchToCheck == minimumSpanningTree[i])return true;
+    for (const auto &b : minimumSpanningTree) {
+        if (branchToCheck == b)
+            return true;
     }
     return false;
 }
@@ -237,9 +241,9 @@ bool Circuit::isBranchInTheTree(Branch branchToCheck) {
 vector<Branch> Circuit::getCoTree() {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     vector<Branch> freeBranches;
-    bool branchInTheTree = false;
     for (int i = 0; i < getNumberOfBranches(); i++) {
-        if (!isBranchInTheTree(branches[i]))freeBranches.push_back(branches[i]);
+        if (!isBranchInTheTree(branches[i]))
+            freeBranches.push_back(branches[i]);
     }
     return freeBranches;
 }
@@ -295,8 +299,8 @@ vector<vector<Branch>> Circuit::getLoops() {
     return loops;
 }
 
-bool Circuit::doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode) {
-    for (auto b:branchesContainingNode) {
+bool Circuit::nodeContainsBranch(const Branch& branchToCheck, const vector<Branch> &branchesContainingNode) {
+    for (auto b : branchesContainingNode) {
         if (b == branchToCheck) return true;
     }
     return false;
@@ -309,18 +313,20 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
     vector<int> currentEquation;
     vector<Node> visitedNodes;
     std::set<Node> nodesInTheCircuit = getNodes();
-    for (auto n : nodesInTheCircuit) {
+    for (const auto &n : nodesInTheCircuit) {
         currentEquation.clear();
         branchesContainingNode = getBranchesContainingNode(n);
-        for (auto b : branches)
-            currentEquation.push_back(doesNodeContainBranch(b, branchesContainingNode) ? 1 : 0);
+        for (const auto &b : branches)
+            currentEquation.push_back(nodeContainsBranch(b, branchesContainingNode) ? 1 : 0);
         matrixOfCurrents.push_back(currentEquation);
     }
     return matrixOfCurrents;
 }
 
-std::ostream &operator<<(std::ostream &os, const Circuit &C) {
-
+std::ostream &operator<<(std::ostream &os, const Circuit &c) {
+    for(auto b : c.branches) {
+        os<<b<<std::endl;
+    }
     return os;
 }
 
