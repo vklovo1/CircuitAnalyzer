@@ -256,6 +256,10 @@ public:
         this->resistance = resistance;
     }
 
+    bool hasInfiniteResistance() const {
+        return fabs(this->resistance + 1) < EPSILON;
+    }
+
     //operators
 
     friend bool operator == (const Resistor &r1, const Resistor &r2) {
@@ -341,7 +345,7 @@ public:
         this->naturalOrientation = !naturalOrientation;
     }
 
-    bool isIdeal() {
+    bool isIdeal() const {
         return fabs(1+internalResistance) < EPSILON;
     }
 
@@ -432,7 +436,7 @@ public:
         naturalOrientation = !naturalOrientation;
     }
 
-    bool isIdeal() {
+    bool isIdeal() const {
         return fabs(1 + internalResistance) < EPSILON;
     }
 
@@ -744,6 +748,109 @@ public:
         return os;
     }
 };
+
+//defines Voltmeter behavior in a circuit
+//
+
+class VoltmeterWrapper {
+    Voltmeter voltmeter;
+    std::pair<Node, Node> voltmeterNodes;
+    Resistor *parasiteResistance;
+public:
+    VoltmeterWrapper(const Voltmeter &voltmeter, const Node &firstNode, const Node &secondNode, Resistor* resistor = nullptr) :
+        voltmeter(voltmeter) {
+        if(resistor == nullptr && !voltmeter.isIdeal())
+            throw std::logic_error("A resistor must by provided for non-ideal voltmeters!");
+        this->voltmeterNodes = std::pair<Node, Node>(firstNode, secondNode);
+        parasiteResistance = resistor;
+    }
+
+    //getters and setters
+
+    const Voltmeter &getVoltmeter() const {
+        return voltmeter;
+    }
+
+    Voltmeter &getVoltmeter() {
+        return voltmeter;
+    }
+
+    void setVoltmeter(const Voltmeter &voltmeter) {
+        VoltmeterWrapper::voltmeter = voltmeter;
+    }
+
+    Resistor *getParasiteResistance() const {
+        return parasiteResistance;
+    }
+
+    void setParasiteResistance(Resistor *parasiteResistance) {
+        VoltmeterWrapper::parasiteResistance = parasiteResistance;
+    }
+
+    const Node &getFirstNode() const {
+        return voltmeterNodes.first;
+    }
+
+    Node &getFirstNode() {
+        return voltmeterNodes.first;
+    }
+
+    void setFirstNode(const Node &n) {
+        voltmeterNodes.first = n;
+    }
+
+    const Node &getSecondNode() const {
+        return voltmeterNodes.second;
+    }
+
+    Node &getSecondNode() {
+        return voltmeterNodes.second;
+    }
+
+    void setSecondNode(const Node &n) {
+        voltmeterNodes.second = n;
+    }
+
+};
+
+class AmpermeterWrapper {
+    Ampermeter ampermeter;
+    Branch ampermeterBranch;
+    Resistor* parasiteResistance;
+
+
+public:
+    AmpermeterWrapper(const Ampermeter &ampermeter, const Branch &ampermeterBranch, Resistor *parasiteResistance)
+            : ampermeter(ampermeter), ampermeterBranch(ampermeterBranch), parasiteResistance(parasiteResistance) {}
+    const Ampermeter &getAmpermeter() const {
+        return ampermeter;
+    }
+
+    void setAmpermeter(const Ampermeter &ampermeter) {
+        AmpermeterWrapper::ampermeter = ampermeter;
+    }
+
+    Resistor *getParasiteResistance() const {
+        return parasiteResistance;
+    }
+
+    void setParasiteResistance(Resistor *parasiteResistance) {
+        AmpermeterWrapper::parasiteResistance = parasiteResistance;
+    }
+
+    const Branch &getAmpermeterBranch() const {
+        return ampermeterBranch;
+    }
+
+    Branch &getAmpermeterBranch() {
+        return ampermeterBranch;
+    }
+
+    void setAmpermeterBranch(const Branch &ampermeterBranch) {
+        AmpermeterWrapper::ampermeterBranch = ampermeterBranch;
+    }
+};
+
 //int main() {
 //return 0;
 //}

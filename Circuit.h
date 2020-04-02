@@ -12,11 +12,16 @@
 #include <memory>
 #include <utility>
 #include <set>
+#include <list>
 
 using std::vector;
+using std::list;
 
 class Circuit {
     vector<Branch> branches;
+    list<VoltmeterWrapper> voltmeters;
+    list<AmpermeterWrapper> ampermeters;
+
     int numberOfNodes;
 
 public:
@@ -28,14 +33,13 @@ public:
 
     void setBranches(const vector<Branch> &branches);
 
-    void addBranch(const Branch &branch);
+    void addBranch(Branch &branch);
 
     void removeBranch(const Branch &branch);
 
     int getNumberOfBranches();
 
     int getNumberOfNodes();
-
 
     int getNumberOfBranchesFromNode(Node node);
 
@@ -72,6 +76,10 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Circuit &C);
 
     static bool nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
+
+    void addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondID);
+
+    void addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID);
 };
 
 

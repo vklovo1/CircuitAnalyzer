@@ -27,7 +27,7 @@ void Circuit::setBranches(const vector<Branch> &branches) {
     Circuit::branches = branches;
 }
 
-void Circuit::addBranch(const Branch &branch) {
+void Circuit::addBranch(Branch &branch) {
     branches.push_back(branch);
 }
 
@@ -183,6 +183,24 @@ void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int se
     c.setIdeal();
     newBranch.addCurrentSource(c);
     addBranch(newBranch);
+}
+
+void Circuit::addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches()+1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addResistor(Resistor(v.getInternalResistance()));
+    addBranch(newBranch);
+
+    VoltmeterWrapper voltmeterWrapper(v, Node(firstNodeID), Node(secondNodeID), &newBranch.getResistors().front());
+    voltmeters.push_back(voltmeterWrapper);
+}
+
+void Circuit::addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches()+1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addResistor(Resistor(a.getInternalResistance()));
+    addBranch(newBranch);
+
+    AmpermeterWrapper ampermeterWrapper(a, newBranch, &newBranch.getResistors().front());
+    ampermeters.push_back(ampermeterWrapper);
 }
 
 bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes) {
