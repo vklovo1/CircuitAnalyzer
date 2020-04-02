@@ -2,6 +2,7 @@
 // Created by 2570p on 24.03.2020..
 //
 
+#include <algorithm>
 #include "Circuit.h"
 
 
@@ -54,7 +55,10 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
     return numberOfBranches;
 }
 
-void Circuit::simplifyCircuit() {
+//adding a component creates a new branch for it
+//this method removes obsolete branches that are actually in series
+
+void Circuit::removeObsoleteBranches() {
     for(int i = 0; i < branches.size(); i++) {
         Node nodeToGetRidOf;
         if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3)
@@ -70,35 +74,50 @@ void Circuit::simplifyCircuit() {
         Node firstNode;
         Node secondNode;
 
-        bool nodeToDeleteWasFirstInTheFirstBranch;
-        bool nodeToDeleteWasFirstInTheSecondBranch;
+        bool firstBranchOrientationChanged;
+        bool secondBranchOrientationChanged;
 
         if(firstBranch.getFirstNode() == nodeToGetRidOf) {
             firstNode = firstBranch.getSecondNode();
-            nodeToDeleteWasFirstInTheFirstBranch = true;
+            firstBranchOrientationChanged = true;
         } else {
             firstNode = firstBranch.getFirstNode();
-            nodeToDeleteWasFirstInTheFirstBranch = false;
+            firstBranchOrientationChanged = false;
         }
 
         if(secondBranch.getFirstNode() == nodeToGetRidOf) {
             secondNode = secondBranch.getSecondNode();
-            nodeToDeleteWasFirstInTheSecondBranch = true;
+            secondBranchOrientationChanged = false;
         } else {
             secondNode = secondBranch.getFirstNode();
-            nodeToDeleteWasFirstInTheSecondBranch = false;
+            secondBranchOrientationChanged = true;
         }
 
-        /*vector<std::shared_ptr<Component>> newBranchComponents(firstBranch.getComponents().size() + secondBranch.getComponents().size());
+        if(!firstBranchOrientationChanged)
+            newBranch += firstBranch;
+        else {
+            std::for_each(firstBranch.getVoltageSources().begin(), firstBranch.getVoltageSources().end(),
+                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+            std::for_each(firstBranch.getCurrentSources().begin(), firstBranch.getCurrentSources().end(),
+                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+            newBranch += firstBranch;
+        }
 
-        if(!nodeToDeleteWasFirstInTheFirstBranch) {
-            for (auto c : firstBranch.getComponents())
-                newBranchComponents.push_back(c);
-        } else {
-            for(auto c : firstBranch.getComponents()) {
-                if(!)
-            }
-        }*/
+        if(!secondBranchOrientationChanged)
+            newBranch += secondBranch;
+        else {
+            std::for_each(secondBranch.getVoltageSources().begin(), secondBranch.getVoltageSources().end(),
+                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+            std::for_each(secondBranch.getCurrentSources().begin(), secondBranch.getCurrentSources().end(),
+                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+            newBranch += secondBranch;
+        }
+
+        newBranch.setId(firstBranch.getId());
+        newBranch.setNodes(firstNode, secondNode);
+        removeBranch(firstBranch);
+        removeBranch(secondBranch);
+        addBranch(newBranch);
     }
 }
 
@@ -140,6 +159,27 @@ std::set<Node> Circuit::getNodes() {
         distinctNodes.insert(b.getSecondNode().getId());
     }
     return distinctNodes;
+}
+
+void Circuit::addResistorToCircuit(const Resistor &r, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addResistor(r);
+    addBranch(newBranch);
+}
+
+void Circuit::addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addVoltageSource(v);
+    addBranch(newBranch);
+}
+
+void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    if(!c.isIdeal())
+        addResistorToCircuit(Resistor(c.getInternalResistance()), firstNodeID, secondNodeID);
+    c.setIdeal();
+    newBranch.addCurrentSource(c);
+    addBranch(newBranch);
 }
 
 bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes) {
@@ -279,67 +319,22 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
     return matrixOfCurrents;
 }
 
-    int main() {
-       /* Node a("A");
-        Node b("B");
-        Node c("C");
-        Node d("D");
-        Node e("E");
-        Node f("F");
-        Node g("G");
-        Branch B1 = Branch("1", std::pair<Node, Node>(a, f), std::vector<Component>{});
-        Branch B2 = Branch("2", std::pair<Node, Node>(f, c), std::vector<Component>{});
-        Branch B3 = Branch("3", std::pair<Node, Node>(c, e), std::vector<Component>{});
-        Branch B4 = Branch("4", std::pair<Node, Node>(e, g), std::vector<Component>{});
-        Branch B5 = Branch("5", std::pair<Node, Node>(g, d), std::vector<Component>{});
-        Branch B6 = Branch("6", std::pair<Node, Node>(d, a), std::vector<Component>{});
-        Branch B7 = Branch("7", std::pair<Node, Node>(a, b), std::vector<Component>{});
-        Branch B8 = Branch("8", std::pair<Node, Node>(b, d), std::vector<Component>{});
-        Branch B9 = Branch("9", std::pair<Node, Node>(d, e), std::vector<Component>{});
-        Branch B10 = Branch("10", std::pair<Node, Node>(e, b), std::vector<Component>{});
-        Branch B11 = Branch("11", std::pair<Node, Node>(b, c), std::vector<Component>{});
-        Branch B12 = Branch("12", std::pair<Node, Node>(b, f), std::vector<Component>{});
-        Branch B13 = Branch("13", std::pair<Node, Node>(a, b), std::vector<Component>{});
-        Branch B14 = Branch("14", std::pair<Node, Node>(b, a), std::vector<Component>{});
-        Branch B15 = Branch("15", std::pair<Node, Node>(a, b), std::vector<Component>{});
-        const vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
-        Circuit krug1;
-        krug1.setBranches(grane);
-        //TEST ZA KONTURU
-        vector<Branch> stablo = krug1.getMinimumSpanningTree();
-        std::cout << "Stablo je";
-        for (int i = 0; i < stablo.size(); i++) {
-            std::cout << stablo[i].getName() << ", ";
-        }
-        //TEST SLOBODNIH GRANA
-        vector<Branch> slobodnaGrana = krug1.getCoTree();
-        std::cout << std::endl << "Slobodne grane: ";
-        for (int i = 0; i < slobodnaGrana.size(); i++) {
-            std::cout << slobodnaGrana[i].getName() << ", ";
-        }
-        //TEST KONTURA
-        vector<vector<Branch>> konture = krug1.getLoops();
-        std::cout << std::endl << "Konture :";
-        for (int i = 0; i < konture.size(); i++) {
-            std::cout << std::endl;
-            for (int j = 0; j < konture[i].size(); j++) {
-                std::cout << konture[i][j].getName() << " ";
-            }
-        }
-        //TEST CVOROVA
-        vector<Node> cvorovi = krug1.getNodes();
-        std::cout << std::endl;
-        for (auto c:cvorovi) {
-            std::cout << c.getName() << ", ";
-        }
-        std::cout << std::endl;
-        //TEST 1 KZ
-        std::cout << "Matrica za prvi KZ:" << std::endl;
-        vector<vector<int>> matricaStruja = krug1.firstKirchhoffRule();
-        int x = 0;
-        for (auto i:matricaStruja) {
-            for (auto j:i)
-                std::cout << j << ", ";
-            std::cout << std::endl;
-        }*/
+std::ostream &operator<<(std::ostream &os, const Circuit &C) {
+
+    return os;
+}
+
+int main() {
+       Circuit c;
+       Node n1(1);
+       Node n2(2);
+       Branch b1(1, n1, n2);
+       b1.addResistor(Resistor());
+       Node n3(3);
+       Branch b2(2, n2, n3);
+       Branch b3(3, n3, n1);
+
+       c.addBranch(b1); c.addBranch(b2); c.addBranch(b3);
+       c.removeObsoleteBranches();
+       std::cout<<c.getNumberOfBranches() << " " << c.getBranches().at(0);
     }

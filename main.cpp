@@ -2,12 +2,13 @@
 #include <cmath>
 #include <memory>
 #include <utility>
-#include <forward_list>
+#include <list>
+#include <algorithm>
 
 
 using std::string;
 using std::pair;
-using std::forward_list;
+using std::list;
 
 const double EPSILON = 10e-7;
 
@@ -73,7 +74,7 @@ public:
         this->naturalOrientation = !naturalOrientation;
     }
 
-    bool isIdeal() {
+    bool isIdeal() const {
         return fabs(internalResistance) < EPSILON;
     }
 
@@ -183,11 +184,11 @@ public:
         CurrentSource::naturalOrientation = naturalOrientation;
     }
 
-    void toggleNaturalOrientation() {
+    void toggleOrientation() {
         naturalOrientation = !naturalOrientation;
     }
 
-    bool isIdeal() {
+    bool isIdeal() const {
         return fabs(1 + internalResistance) < EPSILON;
     }
 
@@ -427,7 +428,7 @@ public:
         Ampermeter::naturalOrientation = naturalOrientation;
     }
 
-    void toggleNaturalOrientation() {
+    void toggleOrientation() {
         naturalOrientation = !naturalOrientation;
     }
 
@@ -476,10 +477,10 @@ class Wattmeter {
 
 class Node {
     int id;
-    double voltage;
+    double voltage = 0;
 
 public:
-    Node() {}
+    explicit Node() {}
 
     Node(int id) {
         setId(id);
@@ -525,14 +526,14 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Node &n)
     {
-        os << "N" << n.getId() << " " << n.getVoltage() << "V";
+        os << "N" << n.getId() << "(" << n.getVoltage() << "V)";
         return os;
     }
 };
 
 class Ground : public Node {
 public:
-    Ground() {
+    explicit Ground() {
         Node::setVoltage(0);
     }
 
@@ -542,14 +543,14 @@ public:
 class Branch {
     int id;
     pair<Node, Node> nodes;
-    forward_list<Resistor> resistors;
-    forward_list<VoltageSource> voltageSources;
-    forward_list<CurrentSource> currentSources;
-    double current;
+    list<Resistor> resistors;
+    list<VoltageSource> voltageSources;
+    list<CurrentSource> currentSources;
+    double current = 0;
 public:
 
-    Branch(int id, const Node &n1, const Node &n2, const forward_list<Resistor> &resistors, const forward_list <VoltageSource> &voltageSources,
-           const forward_list <CurrentSource> &currentSources) {
+    Branch(int id, const Node &n1, const Node &n2, const list<Resistor> &resistors, const list <VoltageSource> &voltageSources,
+           const list <CurrentSource> &currentSources) {
         setId(id);
         setNodes(n1, n2);
         this->resistors = resistors;
@@ -560,12 +561,12 @@ public:
     Branch(int id, const Node &n1, const Node &n2) {
         setId(id);
         setNodes(n1, n2);
-        resistors = forward_list<Resistor>();
-        voltageSources = forward_list<VoltageSource>();
-        currentSources = forward_list<CurrentSource>();
+        resistors = list<Resistor>();
+        voltageSources = list<VoltageSource>();
+        currentSources = list<CurrentSource>();
     }
 
-    Branch() {}
+    explicit Branch() = default;
 
     //getters and setters
 
@@ -607,6 +608,42 @@ public:
         nodes.second = node;
     }
 
+    const list<Resistor> &getResistors() const {
+        return resistors;
+    }
+
+    list<Resistor> &getResistors() {
+        return resistors;
+    }
+
+    void setResistors(const list<Resistor> &resistors) {
+        Branch::resistors = resistors;
+    }
+
+    const list<VoltageSource> &getVoltageSources() const {
+        return voltageSources;
+    }
+
+    list<VoltageSource> &getVoltageSources() {
+        return voltageSources;
+    }
+
+    void setVoltageSources(const list<VoltageSource> &voltageSources) {
+        Branch::voltageSources = voltageSources;
+    }
+
+    const list<CurrentSource> &getCurrentSources() const {
+        return currentSources;
+    }
+
+    list<CurrentSource> &getCurrentSources() {
+        return currentSources;
+    }
+
+    void setCurrentSources(const list<CurrentSource> &currentSources) {
+        Branch::currentSources = currentSources;
+    }
+
     //utility
 
     bool hasResistors() {
@@ -633,6 +670,49 @@ public:
         return isLoop() && isEmpty();
     }
 
+    double getResistance() {
+        double resistance = 0;
+        std::for_each(resistors.begin(), resistors.end(),
+                [&resistance](Resistor r) -> void { resistance += r.getResistance(); });
+    }
+
+    double getVoltageFromVoltageSources() const {
+        double voltage = 0;
+        std::for_each(voltageSources.begin(), voltageSources.end(), [&voltage](VoltageSource v) -> void {
+            if(v.isNaturalOrientation()) voltage += v.getVoltage();
+            else voltage -= v.getVoltage();
+        });
+        return voltage;
+    }
+
+    double getCurrentFromCurrentSources() const {
+        double current = 0;
+        if(currentSources.empty()) return current;
+
+        return currentSources.front().getCurrent();
+    }
+
+    void addResistor(const Resistor &r) {
+        resistors.push_back(r);
+    }
+
+    void addVoltageSource(const VoltageSource &v) {
+        if(!v.isIdeal())
+            resistors.emplace_back(v.getInternalResistance());
+        voltageSources.push_back(v);
+    }
+
+    void addCurrentSource(const CurrentSource &c) {
+        if(!c.isIdeal()) throw std::range_error("Non-ideal current sources can't be added to a single branch!");
+        auto it = currentSources.begin();
+        while(it != currentSources.end()) {
+            if(c.getCurrent() != (*it).getCurrent())
+                throw std::range_error("Current of all current sources must be the same!");
+            it++;
+        }
+        currentSources.push_back(c);
+    }
+
     //operators
 
     friend bool operator == (const Branch &b1, const Branch &b2) {
@@ -651,9 +731,16 @@ public:
         return b1 < b2 || b1 == b2;
     }
 
+    Branch &operator +=(Branch b) { //branches in series
+        this->resistors.splice(resistors.end(), b.getResistors());
+        this->voltageSources.splice(voltageSources.end(), b.getVoltageSources());
+        this->currentSources.splice(currentSources.end(), b.getCurrentSources());
+        return *this;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Branch &b)
     {
-        os << "B" << b.getId() << " " << b.getCurrent() << "A";
+        os <<b.getFirstNode() << "->B" << b.getId() << "(" << b.getCurrent() << "A)->" <<b.getSecondNode();
         return os;
     }
 };
