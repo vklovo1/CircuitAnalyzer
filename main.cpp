@@ -183,7 +183,7 @@ public:
         CurrentSource::naturalOrientation = naturalOrientation;
     }
 
-    void toggleNaturalOrientation() {
+    void toggleOrientation() {
         naturalOrientation = !naturalOrientation;
     }
 
@@ -427,7 +427,7 @@ public:
         Ampermeter::naturalOrientation = naturalOrientation;
     }
 
-    void toggleNaturalOrientation() {
+    void toggleOrientation() {
         naturalOrientation = !naturalOrientation;
     }
 
@@ -545,7 +545,7 @@ class Branch {
     forward_list<Resistor> resistors;
     forward_list<VoltageSource> voltageSources;
     forward_list<CurrentSource> currentSources;
-    double current;
+    double current = 0;
 public:
 
     Branch(int id, const Node &n1, const Node &n2, const forward_list<Resistor> &resistors, const forward_list <VoltageSource> &voltageSources,
@@ -607,6 +607,42 @@ public:
         nodes.second = node;
     }
 
+    const forward_list<Resistor> &getResistors() const {
+        return resistors;
+    }
+
+    forward_list<Resistor> &getResistors() {
+        return resistors;
+    }
+
+    void setResistors(const forward_list<Resistor> &resistors) {
+        Branch::resistors = resistors;
+    }
+
+    const forward_list<VoltageSource> &getVoltageSources() const {
+        return voltageSources;
+    }
+
+    forward_list<VoltageSource> &getVoltageSources() {
+        return voltageSources;
+    }
+
+    void setVoltageSources(const forward_list<VoltageSource> &voltageSources) {
+        Branch::voltageSources = voltageSources;
+    }
+
+    const forward_list<CurrentSource> &getCurrentSources() const {
+        return currentSources;
+    }
+
+    forward_list<CurrentSource> &getCurrentSources() {
+        return currentSources;
+    }
+
+    void setCurrentSources(const forward_list<CurrentSource> &currentSources) {
+        Branch::currentSources = currentSources;
+    }
+
     //utility
 
     bool hasResistors() {
@@ -649,6 +685,13 @@ public:
 
     friend bool operator <= (const Branch &b1, const Branch &b2) {
         return b1 < b2 || b1 == b2;
+    }
+
+    Branch &operator +=(Branch b) { //branches in series
+        this->resistors.splice_after(resistors.end(), b.getResistors());
+        this->voltageSources.splice_after(voltageSources.end(), b.getVoltageSources());
+        this->currentSources.splice_after(currentSources.end(), b.getCurrentSources());
+        return *this;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Branch &b)

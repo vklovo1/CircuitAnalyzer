@@ -57,7 +57,7 @@ public:
 
     std::set<Node> getNodes();
 
-    void simplifyCircuit();
+    void removeObsoleteBranches();
 
     void drawWire(int firstNodeID, int secondNodeID);
 };

@@ -2,6 +2,7 @@
 // Created by 2570p on 24.03.2020..
 //
 
+#include <algorithm>
 #include "Circuit.h"
 
 
@@ -54,7 +55,10 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
     return numberOfBranches;
 }
 
-void Circuit::simplifyCircuit() {
+//adding a component creates a new branch for it
+//this method removes obsolete branches that are actually in series
+
+void Circuit::removeObsoleteBranches() {
     for(int i = 0; i < branches.size(); i++) {
         Node nodeToGetRidOf;
         if(getNumberOfBranchesFromNode(branches[i].getFirstNode()) < 3)
@@ -70,35 +74,50 @@ void Circuit::simplifyCircuit() {
         Node firstNode;
         Node secondNode;
 
-        bool nodeToDeleteWasFirstInTheFirstBranch;
-        bool nodeToDeleteWasFirstInTheSecondBranch;
+        bool firstBranchOrientationChanged;
+        bool secondBranchOrientationChanged;
 
         if(firstBranch.getFirstNode() == nodeToGetRidOf) {
             firstNode = firstBranch.getSecondNode();
-            nodeToDeleteWasFirstInTheFirstBranch = true;
+            firstBranchOrientationChanged = true;
         } else {
             firstNode = firstBranch.getFirstNode();
-            nodeToDeleteWasFirstInTheFirstBranch = false;
+            firstBranchOrientationChanged = false;
         }
 
         if(secondBranch.getFirstNode() == nodeToGetRidOf) {
             secondNode = secondBranch.getSecondNode();
-            nodeToDeleteWasFirstInTheSecondBranch = true;
+            secondBranchOrientationChanged = false;
         } else {
             secondNode = secondBranch.getFirstNode();
-            nodeToDeleteWasFirstInTheSecondBranch = false;
+            secondBranchOrientationChanged = true;
         }
 
-        /*vector<std::shared_ptr<Component>> newBranchComponents(firstBranch.getComponents().size() + secondBranch.getComponents().size());
+        if(!firstBranchOrientationChanged)
+            newBranch += firstBranch;
+        else {
+            std::for_each(firstBranch.getVoltageSources().begin(), firstBranch.getVoltageSources().end(),
+                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+            std::for_each(firstBranch.getCurrentSources().begin(), firstBranch.getCurrentSources().end(),
+                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+            newBranch += firstBranch;
+        }
 
-        if(!nodeToDeleteWasFirstInTheFirstBranch) {
-            for (auto c : firstBranch.getComponents())
-                newBranchComponents.push_back(c);
-        } else {
-            for(auto c : firstBranch.getComponents()) {
-                if(!)
-            }
-        }*/
+        if(!secondBranchOrientationChanged)
+            newBranch += secondBranch;
+        else {
+            std::for_each(secondBranch.getVoltageSources().begin(), secondBranch.getVoltageSources().end(),
+                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+            std::for_each(secondBranch.getCurrentSources().begin(), secondBranch.getCurrentSources().end(),
+                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+            newBranch += secondBranch;
+        }
+
+        newBranch.setId(firstBranch.getId());
+        newBranch.setNodes(firstNode, secondNode);
+        removeBranch(firstBranch);
+        removeBranch(secondBranch);
+        addBranch(newBranch);
     }
 }
 
