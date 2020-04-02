@@ -304,6 +304,15 @@ std::ostream &operator<<(std::ostream &os, const Circuit &C) {
 }
 
 int main() {
-       Circuit c();
-       Branch b
+       Circuit c;
+       Node n1(1);
+       Node n2(2);
+       Branch b1(1, n1, n2);
+       Node n3(3);
+       Branch b2(2, n2, n3);
+       Branch b3(3, n3, n1);
+
+       c.addBranch(b1); c.addBranch(b2); c.addBranch(b3);
+       c.removeObsoleteBranches();
+       std::cout<<c.getNumberOfBranches() << " " << c.getBranches().at(0);
     }

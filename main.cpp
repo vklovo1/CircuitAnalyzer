@@ -3,6 +3,7 @@
 #include <memory>
 #include <utility>
 #include <forward_list>
+#include <algorithm>
 
 
 using std::string;
@@ -476,10 +477,10 @@ class Wattmeter {
 
 class Node {
     int id;
-    double voltage;
+    double voltage = 0;
 
 public:
-    Node() {}
+    explicit Node() {}
 
     Node(int id) {
         setId(id);
@@ -532,7 +533,7 @@ public:
 
 class Ground : public Node {
 public:
-    Ground() {
+    explicit Ground() {
         Node::setVoltage(0);
     }
 
@@ -565,7 +566,7 @@ public:
         currentSources = forward_list<CurrentSource>();
     }
 
-    Branch() {}
+    explicit Branch() {}
 
     //getters and setters
 
@@ -667,6 +668,28 @@ public:
 
     bool isEmptyLoop() {
         return isLoop() && isEmpty();
+    }
+
+    double getResistance() {
+        double resistance = 0;
+        std::for_each(resistors.begin(), resistors.end(),
+                [&resistance](Resistor r) -> void { resistance += r.getResistance(); });
+    }
+
+    double getVoltageFromVoltageSources() {
+        double voltage = 0;
+        std::for_each(voltageSources.begin(), voltageSources.end(), [&voltage](VoltageSource v) -> void {
+            if(v.isNaturalOrientation()) voltage += v.getVoltage();
+            else voltage -= v.getVoltage();
+        });
+        return voltage;
+    }
+
+    double getCurrentFromCurrentSources() {
+        double current = 0;
+        if(currentSources.empty()) return current;
+
+        return currentSources.front().getCurrent();
     }
 
     //operators
