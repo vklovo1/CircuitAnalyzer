@@ -60,6 +60,8 @@ public:
     void removeObsoleteBranches();
 
     void drawWire(int firstNodeID, int secondNodeID);
+
+    friend std::ostream& operator<<(std::ostream& os, const Circuit &C);
 };
 
 

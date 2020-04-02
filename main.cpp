@@ -696,7 +696,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Branch &b)
     {
-        os << "B" << b.getId() << " " << b.getCurrent() << "A";
+        os <<b.getFirstNode() << "-> B" << b.getId() << " " << b.getCurrent() << "A ->" <<b.getSecondNode();
         return os;
     }
 };
