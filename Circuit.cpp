@@ -161,6 +161,27 @@ std::set<Node> Circuit::getNodes() {
     return distinctNodes;
 }
 
+void Circuit::addResistorToCircuit(const Resistor &r, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addResistor(r);
+    addBranch(newBranch);
+}
+
+void Circuit::addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    newBranch.addVoltageSource(v);
+    addBranch(newBranch);
+}
+
+void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int secondNodeID) {
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    if(!c.isIdeal())
+        addResistorToCircuit(Resistor(c.getInternalResistance()), firstNodeID, secondNodeID);
+    c.setIdeal();
+    newBranch.addCurrentSource(c);
+    addBranch(newBranch);
+}
+
 bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes) {
     for (int i = 0; i < visitedNodes.size(); i++) {
         if (nodeToCheck == visitedNodes[i])
@@ -308,6 +329,7 @@ int main() {
        Node n1(1);
        Node n2(2);
        Branch b1(1, n1, n2);
+       b1.addResistor(Resistor());
        Node n3(3);
        Branch b2(2, n2, n3);
        Branch b3(3, n3, n1);

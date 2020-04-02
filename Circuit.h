@@ -62,6 +62,12 @@ public:
     void drawWire(int firstNodeID, int secondNodeID);
 
     friend std::ostream& operator<<(std::ostream& os, const Circuit &C);
+
+    void addResistorToCircuit(const Resistor &r, int firstNodeID, int secondNodeID);
+
+    void addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID);
+
+    void addCurrentSourceToCircuit(CurrentSource V, int firstNodeID, int secondNodeID);
 };
 
 
