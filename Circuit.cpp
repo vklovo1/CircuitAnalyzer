@@ -178,6 +178,7 @@ int Circuit::getNumberOfNodes() {
         distinctNodes.insert(b.getFirstNode().getId());
         distinctNodes.insert(b.getSecondNode().getId());
     }
+    return distinctNodes.size();
 }
 
 std::set<Node> Circuit::getNodes() {

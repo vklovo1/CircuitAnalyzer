@@ -683,6 +683,7 @@ public:
                 break;
             } else resistance += r.getResistance();
         }
+        return resistance;
     }
 
     double getVoltageFromVoltageSources() const {
