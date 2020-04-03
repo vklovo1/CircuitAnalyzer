@@ -178,6 +178,7 @@ int Circuit::getNumberOfNodes() {
         distinctNodes.insert(b.getFirstNode().getId());
         distinctNodes.insert(b.getSecondNode().getId());
     }
+    return distinctNodes.size();
 }
 
 std::set<Node> Circuit::getNodes() {
@@ -395,7 +396,7 @@ int main() {
     Branch B13 = Branch(13, a, b);
     Branch B14 = Branch(14, b, a);
     Branch B15 = Branch(15, a, b);
-    const vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
+    const vector<Branch> grane = {B1, B2, B3, B4,  B6, B7, B8, B9, B10, B11, B12};
     Circuit krug1;
     krug1.setBranches(grane);
     //TEST ZA KONTURU
