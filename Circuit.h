@@ -80,6 +80,10 @@ public:
     void addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondID);
 
     void addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID);
+
+    void removeBranchesWithInfiniteResistance();
+
+    void shortConnectBranchesWithZeroResistance();
 };
 
 

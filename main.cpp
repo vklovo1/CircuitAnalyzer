@@ -676,8 +676,13 @@ public:
 
     double getResistance() {
         double resistance = 0;
-        std::for_each(resistors.begin(), resistors.end(),
-                [&resistance](Resistor r) -> void { resistance += r.getResistance(); });
+
+        for(auto r : resistors) {
+            if(r.hasInfiniteResistance()) {
+                resistance = -1;
+                break;
+            } else resistance += r.getResistance();
+        }
     }
 
     double getVoltageFromVoltageSources() const {
