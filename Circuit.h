@@ -12,11 +12,16 @@
 #include <memory>
 #include <utility>
 #include <set>
+#include <list>
 
 using std::vector;
+using std::list;
 
 class Circuit {
     vector<Branch> branches;
+    list<VoltmeterWrapper> voltmeters;
+    list<AmpermeterWrapper> ampermeters;
+
     int numberOfNodes;
 
 public:
@@ -28,7 +33,7 @@ public:
 
     void setBranches(const vector<Branch> &branches);
 
-    void addBranch(const Branch &branch);
+    void addBranch(Branch &branch);
 
     void removeBranch(const Branch &branch);
 
@@ -36,12 +41,11 @@ public:
 
     int getNumberOfNodes();
 
-
     int getNumberOfBranchesFromNode(Node node);
 
     vector<Branch> getBranchesContainingNode(Node node);
 
-    bool isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes);
+    static bool isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes);
 
     vector<Branch> getMinimumSpanningTree();
 
@@ -52,8 +56,6 @@ public:
     bool isBranchInTheTree(Branch branchToCheck);
 
     vector<vector<int>> firstKirchhoffRule();
-
-    static bool doesNodeContainBranch(Branch branchToCheck, vector<Branch> branchesContainingNode);
 
     std::set<Node> getNodes();
 
@@ -68,6 +70,20 @@ public:
     void addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID);
 
     void addCurrentSourceToCircuit(CurrentSource V, int firstNodeID, int secondNodeID);
+
+    vector<Branch> &getBranches();
+
+    friend std::ostream &operator<<(std::ostream &os, const Circuit &C);
+
+    static bool nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
+
+    void addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondID);
+
+    void addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID);
+
+    void removeBranchesWithInfiniteResistance();
+
+    void shortConnectBranchesWithZeroResistance();
 };
 
 
