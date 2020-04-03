@@ -86,6 +86,8 @@ public:
     void shortConnectBranchesWithZeroResistance();
 
     vector<Branch> getBranchesWithoutCurrentSource();
+
+    vector<Branch> getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck);
 };
 
 

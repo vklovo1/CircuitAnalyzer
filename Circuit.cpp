@@ -242,7 +242,13 @@ bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &vi
     }
     return false;
 }
-
+vector<Branch> Circuit::getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck){
+    vector<Branch> vectorToReturn;
+    for(auto b : vectorToCheck){
+        if(!b.hasCurrentSources()) vectorToReturn.push_back(b);
+    }
+    return vectorToReturn;
+}
 vector<Branch> Circuit::getMinimumSpanningTree() {
     Node startingNode = branches[0].getFirstNode();
     Node currentNode = startingNode;
