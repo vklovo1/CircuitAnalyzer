@@ -84,6 +84,8 @@ public:
     void removeBranchesWithInfiniteResistance();
 
     void shortConnectBranchesWithZeroResistance();
+
+    vector<Branch> getBranchesWithoutCurrentSource();
 };
 
 

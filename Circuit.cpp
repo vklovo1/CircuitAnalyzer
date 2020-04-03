@@ -228,6 +228,13 @@ void Circuit::addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNo
     ampermeters.push_back(ampermeterWrapper);
 }
 
+vector<Branch> Circuit::getBranchesWithoutCurrentSource() {
+    vector<Branch> branchesWithoutCurrentSource;
+    for (auto b: branches)
+        if (!b.hasCurrentSources()) branchesWithoutCurrentSource.push_back(b);
+    return branchesWithoutCurrentSource;
+}
+
 bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes) {
     for (int i = 0; i < visitedNodes.size(); i++) {
         if (nodeToCheck == visitedNodes[i])
@@ -396,7 +403,7 @@ int main() {
     Branch B13 = Branch(13, a, b);
     Branch B14 = Branch(14, b, a);
     Branch B15 = Branch(15, a, b);
-    const vector<Branch> grane = {B1, B2, B3, B4,  B6, B7, B8, B9, B10, B11, B12};
+    const vector<Branch> grane = {B1, B2, B3, B4, B6, B7, B8, B9, B10, B11, B12};
     Circuit krug1;
     krug1.setBranches(grane);
     //TEST ZA KONTURU
