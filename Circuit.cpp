@@ -6,7 +6,7 @@
 #include "Circuit.h"
 
 
-Circuit::Circuit(const vector<Branch> &branches)  {
+Circuit::Circuit(const vector<Branch> &branches) {
     this->branches = branches;
 }
 
@@ -62,11 +62,11 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
 //this method removes obsolete branches that are actually in series
 
 void Circuit::removeObsoleteBranches() {
-    for(auto &b : branches) {
+    for (auto &b : branches) {
         Node nodeToGetRidOf;
-        if(getNumberOfBranchesFromNode(b.getFirstNode()) < 3)
+        if (getNumberOfBranchesFromNode(b.getFirstNode()) < 3)
             nodeToGetRidOf = b.getFirstNode();
-        else if(getNumberOfBranchesFromNode(b.getSecondNode()) < 3)
+        else if (getNumberOfBranchesFromNode(b.getSecondNode()) < 3)
             nodeToGetRidOf = b.getSecondNode();
         else continue;
 
@@ -80,7 +80,7 @@ void Circuit::removeObsoleteBranches() {
         bool firstBranchOrientationChanged;
         bool secondBranchOrientationChanged;
 
-        if(firstBranch.getFirstNode() == nodeToGetRidOf) {
+        if (firstBranch.getFirstNode() == nodeToGetRidOf) {
             firstNode = firstBranch.getSecondNode();
             firstBranchOrientationChanged = true;
         } else {
@@ -88,7 +88,7 @@ void Circuit::removeObsoleteBranches() {
             firstBranchOrientationChanged = false;
         }
 
-        if(secondBranch.getFirstNode() == nodeToGetRidOf) {
+        if (secondBranch.getFirstNode() == nodeToGetRidOf) {
             secondNode = secondBranch.getSecondNode();
             secondBranchOrientationChanged = false;
         } else {
@@ -96,23 +96,23 @@ void Circuit::removeObsoleteBranches() {
             secondBranchOrientationChanged = true;
         }
 
-        if(!firstBranchOrientationChanged)
+        if (!firstBranchOrientationChanged)
             newBranch += firstBranch;
         else {
             std::for_each(firstBranch.getVoltageSources().begin(), firstBranch.getVoltageSources().end(),
-                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+                          [](VoltageSource &c) -> void { c.toggleOrientation(); });
             std::for_each(firstBranch.getCurrentSources().begin(), firstBranch.getCurrentSources().end(),
-                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+                          [](CurrentSource &c) -> void { c.toggleOrientation(); });
             newBranch += firstBranch;
         }
 
-        if(!secondBranchOrientationChanged)
+        if (!secondBranchOrientationChanged)
             newBranch += secondBranch;
         else {
             std::for_each(secondBranch.getVoltageSources().begin(), secondBranch.getVoltageSources().end(),
-                    [](VoltageSource &c) -> void { c.toggleOrientation() ; });
+                          [](VoltageSource &c) -> void { c.toggleOrientation(); });
             std::for_each(secondBranch.getCurrentSources().begin(), secondBranch.getCurrentSources().end(),
-                    [](CurrentSource &c) -> void { c.toggleOrientation(); });
+                          [](CurrentSource &c) -> void { c.toggleOrientation(); });
             newBranch += secondBranch;
         }
 
@@ -125,25 +125,26 @@ void Circuit::removeObsoleteBranches() {
 }
 
 void Circuit::removeBranchesWithInfiniteResistance() {
-    for(auto b : branches) {
-        if(fabs(b.getResistance()) < EPSILON)
+    for (auto b : branches) {
+        if (fabs(b.getResistance() + 1) < EPSILON)
             removeBranch(b);
     }
 }
 
 void Circuit::shortConnectBranchesWithZeroResistance() {
-    for(auto b : branches) {
+    for (auto b : branches) {
         if (fabs(b.getResistance()) < EPSILON) {
             Node firstNode = b.getFirstNode();
             Node secondNode = b.getSecondNode();
             auto branchesContainingSecondNode = getBranchesContainingNode(secondNode);
 
-            for(auto b: getBranchesContainingNode(secondNode)) {
-                if(b.getFirstNode() == secondNode)
+            for (auto b: getBranchesContainingNode(secondNode)) {
+                if (b.getFirstNode() == secondNode)
                     b.setFirstNode(firstNode);
-                if(b.getSecondNode() == secondNode)
+                if (b.getSecondNode() == secondNode)
                     b.setSecondNode(firstNode);
             }
+            removeBranch(b);
         }
     }
 }
@@ -151,7 +152,7 @@ void Circuit::shortConnectBranchesWithZeroResistance() {
 void Circuit::drawWire(int firstNodeID, int secondNodeID) {
     int lesserNodeIndex, higherNodeIndex;
 
-    if(firstNodeID < secondNodeID) {
+    if (firstNodeID < secondNodeID) {
         lesserNodeIndex = firstNodeID;
         higherNodeIndex = secondNodeID;
     } else {
@@ -159,10 +160,10 @@ void Circuit::drawWire(int firstNodeID, int secondNodeID) {
         higherNodeIndex = firstNodeID;
     }
 
-    for(Branch b : branches) {
-        if(b.getFirstNode().getId() == higherNodeIndex)
+    for (Branch b : branches) {
+        if (b.getFirstNode().getId() == higherNodeIndex)
             b.setFirstNode(Node(lesserNodeIndex));
-        else if(b.getSecondNode().getId() == higherNodeIndex)
+        else if (b.getSecondNode().getId() == higherNodeIndex)
             b.setSecondNode(Node(lesserNodeIndex));
     }
 }
@@ -173,7 +174,7 @@ int Circuit::getNumberOfBranches() {
 
 int Circuit::getNumberOfNodes() {
     std::set<int> distinctNodes;
-    for(Branch b : branches) {
+    for (Branch b : branches) {
         distinctNodes.insert(b.getFirstNode().getId());
         distinctNodes.insert(b.getSecondNode().getId());
     }
@@ -181,7 +182,7 @@ int Circuit::getNumberOfNodes() {
 
 std::set<Node> Circuit::getNodes() {
     std::set<Node> distinctNodes;
-    for(Branch b : branches) {
+    for (Branch b : branches) {
         distinctNodes.insert(b.getFirstNode().getId());
         distinctNodes.insert(b.getSecondNode().getId());
     }
@@ -202,15 +203,14 @@ void Circuit::addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID,
 
 void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int secondNodeID) {
     Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
-    if(!c.isIdeal())
-        addResistorToCircuit(Resistor(c.getInternalResistance()), firstNodeID, secondNodeID);
+    addResistorToCircuit(Resistor(c.getInternalResistance()), firstNodeID, secondNodeID);
     c.setIdeal();
     newBranch.addCurrentSource(c);
     addBranch(newBranch);
 }
 
 void Circuit::addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches()+1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
     newBranch.addResistor(Resistor(v.getInternalResistance()));
     addBranch(newBranch);
 
@@ -219,7 +219,7 @@ void Circuit::addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondNode
 }
 
 void Circuit::addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches()+1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
     newBranch.addResistor(Resistor(a.getInternalResistance()));
     addBranch(newBranch);
 
@@ -310,7 +310,8 @@ vector<vector<Branch>> Circuit::getLoops() {
             if (goBack) {
                 currentNode = orderOfVisitedNodes.top();
                 orderOfVisitedNodes.pop();
-                currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
+                if (currentLoop.size() == 1 || currentLoop.size() == 0) currentLoop.clear();
+                else currentLoop.erase(currentLoop.begin() + currentLoop.size() - 1);
             }
             visitedNodes.push_back(currentNode);
             if (currentNode == endingNode)break;
@@ -332,16 +333,15 @@ vector<vector<Branch>> Circuit::getLoops() {
                 }
                 if (j == branchesContainingNode.size() - 1)
                     goBack = true; //dead end - no tree branches to connect the loop, go back
-
             }
-            loops.push_back(currentLoop);
-            currentLoop.clear();
         }
+        loops.push_back(currentLoop);
+        currentLoop.clear();
     }
     return loops;
 }
 
-bool Circuit::nodeContainsBranch(const Branch& branchToCheck, const vector<Branch> &branchesContainingNode) {
+bool Circuit::nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode) {
     for (auto b : branchesContainingNode) {
         if (b == branchToCheck) return true;
     }
@@ -366,73 +366,138 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
 }
 
 std::ostream &operator<<(std::ostream &os, const Circuit &c) {
-    for(auto b : c.branches) {
-        os<<b<<std::endl;
+    for (auto b : c.branches) {
+        os << b << std::endl;
     }
     return os;
 }
 
 int main() {
-       Circuit c;
-       char choice;
-       bool breakLoop = false;
-       int id = 0;
-       int node1, node2;
-       double resistance;
-       double voltage;
-       double current;
-       while(true) {
-           std::cout<< "Enter R for resistor, C for current source, E for voltage source, A for ampermeter, or V for voltmeter (X for exit):\n";
-           std::cin >> choice;
-           choice = toupper(choice);
-           switch (choice) {
-               case 'R':
-                   std::cout << "Enter resistance:\n";
-                   std::cin >> resistance;
-                   std::cout << "Enter nodes (two integers):\n";
-                   std::cin >> node1 >> node2;
-                   c.addResistorToCircuit(Resistor(resistance, id++), node1, node2);
-                   break;
-               case 'C':
-                   std::cout << "Enter current:\n";
-                   std::cin >> current;
-                   std::cout << "Enter nodes (two integers):\n";
-                   std::cin >> node1 >> node2;
-                   std::cout << "Enter internal resistance (-1 for ideal):\n";
-                   std::cin >> resistance;
-                   c.addCurrentSourceToCircuit(CurrentSource(id++, current, resistance), node1, node2);
-                   break;
-               case 'E':
-                   std::cout << "Enter voltage:\n";
-                   std::cin >> voltage;
-                   std::cout << "Enter nodes (two integers):\n";
-                   std::cin >> node1 >> node2;
-                   std::cout << "Enter internal resistance (0 for ideal):\n";
-                   std::cin >> resistance;
-                   c.addVoltageSourceToCircuit(VoltageSource(id++, voltage, resistance), node1, node2);
-                   break;
-               case 'A':
-                   std::cout << "Enter internal resistance (0 for ideal):\n";
-                   std::cin >> resistance;
-                   std::cout << "Enter nodes (two integers):\n";
-                   std::cin >> node1 >> node2;
-                   c.addAmpermeterToCircuit(Ampermeter(id++, resistance), node1, node2);
-                   break;
-               case 'V':
-                   std::cout << "Enter internal resistance (-1 for ideal):\n";
-                   std::cin >> resistance;
-                   std::cout << "Enter nodes (two integers):\n";
-                   std::cin >> node1 >> node2;
-                   c.addVoltmeterToCircuit(Voltmeter(id++, resistance), node1, node2);
-                   break;
-               case 'X':
-                   breakLoop = true;
-                   break;
-               default :
-                   std::cout << "Wrong letter!\n";
-           }
-           if (breakLoop) break;
-       }
-       c.removeObsoleteBranches();
-       std::cout<<c;
+    Node a(1);
+    Node b(2);
+    Node c(3);
+    Node d(4);
+    Node e(5);
+    Node f(6);
+    Node g(7);
+    Branch B1 = Branch(1, a, f);
+    Branch B2 = Branch(2, f, c);
+    Branch B3 = Branch(3, c, e);
+    Branch B4 = Branch(4, e, g);
+    Branch B5 = Branch(5, g, d);
+    Branch B6 = Branch(6, d, a);
+    Branch B7 = Branch(7, a, b);
+    Branch B8 = Branch(8, b, d);
+    Branch B9 = Branch(9, d, e);
+    Branch B10 = Branch(10, e, b);
+    Branch B11 = Branch(11, b, c);
+    Branch B12 = Branch(12, b, f);
+    Branch B13 = Branch(13, a, b);
+    Branch B14 = Branch(14, b, a);
+    Branch B15 = Branch(15, a, b);
+    const vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
+    Circuit krug1;
+    krug1.setBranches(grane);
+    //TEST ZA KONTURU
+    vector<Branch> stablo = krug1.getMinimumSpanningTree();
+    std::cout << "Stablo je";
+    for (int i = 0; i < stablo.size(); i++) {
+        std::cout << stablo[i] << ", ";
     }
+    //TEST SLOBODNIH GRANA
+    vector<Branch> slobodnaGrana = krug1.getCoTree();
+    std::cout << std::endl << "Slobodne grane: ";
+    for (int i = 0; i < slobodnaGrana.size(); i++) {
+        std::cout << slobodnaGrana[i] << ", ";
+    }
+    //TEST KONTURA
+    vector<vector<Branch>> konture = krug1.getLoops();
+    std::cout << std::endl << "Konture :";
+    for (int i = 0; i < konture.size(); i++) {
+        std::cout << std::endl;
+        for (int j = 0; j < konture[i].size(); j++) {
+            std::cout << konture[i][j] << " ";
+        }
+    }
+    //TEST CVOROVA
+    std::set<Node> cvorovi = krug1.getNodes();
+    std::cout << std::endl;
+    for (auto c:cvorovi) {
+        std::cout << c << ", ";
+    }
+    std::cout << std::endl;
+    //TEST 1 KZ
+    std::cout << "Matrica za prvi KZ:" << std::endl;
+    vector<vector<int>> matricaStruja = krug1.firstKirchhoffRule();
+    int x = 0;
+    for (auto i:matricaStruja) {
+        for (auto j:i)
+            std::cout << j << ", ";
+        std::cout << std::endl;
+    }
+}
+
+/*  int main() {
+     Circuit c;
+     char choice;
+     bool breakLoop = false;
+     int id = 0;
+     int node1, node2;
+     double resistance;
+     double voltage;
+     double current;
+     while(true) {
+         std::cout<< "Enter R for resistor, C for current source, E for voltage source, A for ampermeter, or V for voltmeter (X for exit):\n";
+         std::cin >> choice;
+         choice = toupper(choice);
+         switch (choice) {
+             case 'R':
+                 std::cout << "Enter resistance:\n";
+                 std::cin >> resistance;
+                 std::cout << "Enter nodes (two integers):\n";
+                 std::cin >> node1 >> node2;
+                 c.addResistorToCircuit(Resistor(resistance, id++), node1, node2);
+                 break;
+             case 'C':
+                 std::cout << "Enter current:\n";
+                 std::cin >> current;
+                 std::cout << "Enter nodes (two integers):\n";
+                 std::cin >> node1 >> node2;
+                 std::cout << "Enter internal resistance (-1 for ideal):\n";
+                 std::cin >> resistance;
+                 c.addCurrentSourceToCircuit(CurrentSource(id++, current, resistance), node1, node2);
+                 break;
+             case 'E':
+                 std::cout << "Enter voltage:\n";
+                 std::cin >> voltage;
+                 std::cout << "Enter nodes (two integers):\n";
+                 std::cin >> node1 >> node2;
+                 std::cout << "Enter internal resistance (0 for ideal):\n";
+                 std::cin >> resistance;
+                 c.addVoltageSourceToCircuit(VoltageSource(id++, voltage, resistance), node1, node2);
+                 break;
+             case 'A':
+                 std::cout << "Enter internal resistance (0 for ideal):\n";
+                 std::cin >> resistance;
+                 std::cout << "Enter nodes (two integers):\n";
+                 std::cin >> node1 >> node2;
+                 c.addAmpermeterToCircuit(Ampermeter(id++, resistance), node1, node2);
+                 break;
+             case 'V':
+                 std::cout << "Enter internal resistance (-1 for ideal):\n";
+                 std::cin >> resistance;
+                 std::cout << "Enter nodes (two integers):\n";
+                 std::cin >> node1 >> node2;
+                 c.addVoltmeterToCircuit(Voltmeter(id++, resistance), node1, node2);
+                 break;
+             case 'X':
+                 breakLoop = true;
+                 break;
+             default :
+                 std::cout << "Wrong letter!\n";
+         }
+         if (breakLoop) break;
+     }
+     c.removeObsoleteBranches();
+     std::cout<<c;
+  }*/
