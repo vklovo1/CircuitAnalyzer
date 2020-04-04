@@ -75,7 +75,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const Circuit &C);
 
-    static bool nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
+    static bool doesNodeContainBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
 
     void addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondID);
 

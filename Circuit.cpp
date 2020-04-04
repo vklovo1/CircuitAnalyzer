@@ -257,6 +257,7 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
     std::stack<Node> orderOfVisitedNodes;
     while (true) {
         vector<Branch> branchesContainingNode = this->getBranchesContainingNode(currentNode);
+        branchesContainingNode=getBranchesWithoutCurrentSourceFromVector(branchesContainingNode);
         if (currentNode == startingNode && isNodeInNodeVector(startingNode, visitedNodes))
             break;
         visitedNodes.push_back(currentNode);
@@ -301,6 +302,7 @@ vector<Branch> Circuit::getCoTree() {
         if (!isBranchInTheTree(branches[i]))
             freeBranches.push_back(branches[i]);
     }
+    freeBranches=getBranchesWithoutCurrentSourceFromVector(freeBranches);
     return freeBranches;
 }
 
@@ -355,7 +357,7 @@ vector<vector<Branch>> Circuit::getLoops() {
     return loops;
 }
 
-bool Circuit::nodeContainsBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode) {
+bool Circuit::doesNodeContainBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode) {
     for (auto b : branchesContainingNode) {
         if (b == branchToCheck) return true;
     }
@@ -372,8 +374,15 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
     for (const auto &n : nodesInTheCircuit) {
         currentEquation.clear();
         branchesContainingNode = getBranchesContainingNode(n);
-        for (const auto &b : branches)
-            currentEquation.push_back(nodeContainsBranch(b, branchesContainingNode) ? 1 : 0);
+        for (const auto &b : branches){
+            if(doesNodeContainBranch(b,branchesContainingNode)){
+                if(n == b.getFirstNode())
+                    currentEquation.push_back(-1);
+                else if(n==b.getSecondNode()) currentEquation.push_back(1);
+            }
+            else currentEquation.push_back(0);
+        }
+
         matrixOfCurrents.push_back(currentEquation);
     }
     return matrixOfCurrents;
@@ -409,9 +418,22 @@ int main() {
     Branch B13 = Branch(13, a, b);
     Branch B14 = Branch(14, b, a);
     Branch B15 = Branch(15, a, b);
-    const vector<Branch> grane = {B1, B2, B3, B4, B6, B7, B8, B9, B10, B11, B12};
+    vector<Branch> grane = {B1, B2, B3, B4,B5, B6, B7, B8, B9, B10, B11, B12};
+
+    CurrentSource C1=CurrentSource(1);
+    std::list<CurrentSource> lista;
+    lista.push_back(C1);
+
+
+
+    std::cout<<lista.size()<<std::endl<<lista.empty()<<std::endl;
+    B1.setCurrentSources(lista);
+    Branch test = B1;
+    std::cout<<"---asdaf=="<<grane[0].getCurrentSources().size()<<"---asfa="<<B1.getCurrentSources().size();
+
     Circuit krug1;
     krug1.setBranches(grane);
+
     //TEST ZA KONTURU
     vector<Branch> stablo = krug1.getMinimumSpanningTree();
     std::cout << "Stablo je";
@@ -446,7 +468,7 @@ int main() {
     int x = 0;
     for (auto i:matricaStruja) {
         for (auto j:i)
-            std::cout << j << ", ";
+            std::cout << j << " ";
         std::cout << std::endl;
     }
 }
