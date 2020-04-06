@@ -455,7 +455,7 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
                 commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(j + 1));
             else commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(0)); //else check it with the next one
             resistanceOfABranch = currentLoop.at(j).getResistance();
-            voltageOfABranch = currentLoop.at(i).getVoltageFromVoltageSources();
+            voltageOfABranch = currentLoop.at(j).getVoltageFromVoltageSources();
             if (commonNodeOfBranches == currentLoop.at(j).getFirstNode()) {
                 currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
                 sumOfVoltageSourcesInLoop -= voltageOfABranch;
@@ -494,6 +494,28 @@ int main() {
     Branch B13 = Branch(13, a, b);
     Branch B14 = Branch(14, b, a);
     Branch B15 = Branch(15, a, b);
+    //Add some components
+    B1.addResistor(100);
+    B2.addResistor(200);
+    B3.addResistor(300);
+    B4.addResistor(400);
+    B6.addResistor(600);
+    B7.addResistor(700);
+    B9.addResistor(900);
+    B8.addResistor(240);
+    B10.addResistor(1000);
+    VoltageSource v1(1,20);
+    VoltageSource v2(2,70);
+    VoltageSource v3(3,30, 0, false);
+    VoltageSource v4(4,50);
+    VoltageSource v5(5,90,0,false);
+    VoltageSource v6(6,40,0,false);
+    B11.addVoltageSource(v2);
+    B1.addVoltageSource(v1);
+    B2.addVoltageSource(v2);
+    B1.addVoltageSource(v3);
+    B4.addVoltageSource(v4);
+    B8.addVoltageSource(v5);
 
     //TEST CURRENT SOURCE
     CurrentSource C1 = CurrentSource(1);
@@ -538,6 +560,15 @@ int main() {
     vector<vector<int>> matricaStruja = krug1.firstKirchhoffsLaw();
     int x = 0;
     for (auto i:matricaStruja) {
+        for (auto j:i)
+            std::cout << j << " ";
+        std::cout << std::endl;
+    }
+    //Test 2 KZ
+
+    vector<vector<double>> matrixSecondKirchoffsLaw = krug1.secondKirchoffsLaw();
+    std::cout<<std::endl;
+    for (auto i:matrixSecondKirchoffsLaw) {
         for (auto j:i)
             std::cout << j << " ";
         std::cout << std::endl;
