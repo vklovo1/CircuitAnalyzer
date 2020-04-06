@@ -441,12 +441,15 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
     double resistanceOfABranch;
     double voltageOfABranch;
     double sumOfVoltageSourcesInLoop = 0;
+    Node startingNode;
     for (int i = 0; i < getnumberOfLoops(); i++) { // i represents index number of a loop in a loop matrix, rows represent loops
         sumOfVoltageSourcesInLoop = 0;
         currentEquation.clear();
         currentEquation.resize(getNumberOfBranches(),0); //make placeholders in currentEquation
         currentLoop = loopsInCircuit.at(i);
+        startingNode=currentLoop.at(0).getFirstNode();
         //Go through the Loop
+
         for (int j = 0; j < currentLoop.size(); j++) {
             int indexOfABranchInBranchesVector = indexOfABranchInBranches(currentLoop.at(j));
             Node commonNodeOfBranches;
@@ -454,6 +457,9 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
             if (j != currentLoop.size() - 1) //If this is the last branch in the loop, check it with the first (starting one)
                 commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(j + 1));
             else commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(0)); //else check it with the next one
+            if(currentLoop.size()==2){ //SPECIAL CASE -- Loop has only two branches -- they have both nodes common
+
+            }
             resistanceOfABranch = currentLoop.at(j).getResistance();
             voltageOfABranch = currentLoop.at(j).getVoltageFromVoltageSources();
             if (commonNodeOfBranches == currentLoop.at(j).getFirstNode()) {
@@ -517,13 +523,18 @@ int main() {
     B4.addVoltageSource(v4);
     B8.addVoltageSource(v5);
 
+    B13.addResistor(250);
+    B13.addVoltageSource(v3);
+    B14.addResistor(500);
+    B15.addResistor(2450);
+
     //TEST CURRENT SOURCE
     CurrentSource C1 = CurrentSource(1);
     std::list<CurrentSource> lista;
     lista.push_back(C1);
     B5.setCurrentSources(lista);
 
-    vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
+    vector<Branch> grane = {B13,B14,B15};
     Circuit krug1;
     krug1.setBranches(grane);
 
