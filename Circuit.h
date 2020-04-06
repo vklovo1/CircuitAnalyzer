@@ -55,7 +55,7 @@ public:
 
     bool isBranchInTheTree(Branch branchToCheck);
 
-    vector<vector<int>> firstKirchhoffRule();
+    vector<vector<int>> firstKirchhoffsLaw();
 
     std::set<Node> getNodes();
 
@@ -89,7 +89,7 @@ public:
 
     vector<Branch> getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck);
 
-    vector<std::vector<double>> secondKirchoffRule();
+    vector<std::vector<double>> secondKirchoffsLaw();
 
     bool isBranchInTheLoop(Branch branchToCheck, int IndexOfALoop);
 

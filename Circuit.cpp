@@ -377,7 +377,7 @@ bool Circuit::isBranchInTheVector(const Branch &branchToCheck, const vector<Bran
 //First Kirchoffs Law returning the int matrix of elements
 //Rows representing Nodes for Kirchoffs Law, the number of Rows is numberOfNodes - 1
 //Coloumns represent currents which are sorted same as the branches in branches vector of a circuit
-vector<vector<int>> Circuit::firstKirchhoffRule() {
+vector<vector<int>> Circuit::firstKirchhoffsLaw() {
     int numberOfNodes = getNumberOfNodes();
     vector<vector<int>> matrixOfCurrents;
     vector<Branch> branchesContainingNode;
@@ -433,7 +433,7 @@ int Circuit::indexOfABranchInBranches(Branch branchToCheck) {
 //Rows represent Loops -- Number of loops = number of rows
 //Coloumns represent voltage drops on each Branch, Branches are sorted same as vector Branches of the circuit
 //Last Coloumn represents sum of all Voltage Sources in the loop
-std::vector<std::vector<double>> Circuit::secondKirchoffRule() {
+std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
     vector<vector<Branch>> loopsInCircuit = getLoops();
     vector<vector<double>> matrixSecondKirchoffRule;
     vector<double> currentEquation;
@@ -535,7 +535,7 @@ int main() {
     std::cout << std::endl;
     //TEST 1 KZ
     std::cout << "Matrica za prvi KZ:" << std::endl;
-    vector<vector<int>> matricaStruja = krug1.firstKirchhoffRule();
+    vector<vector<int>> matricaStruja = krug1.firstKirchhoffsLaw();
     int x = 0;
     for (auto i:matricaStruja) {
         for (auto j:i)
