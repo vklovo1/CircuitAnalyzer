@@ -6,6 +6,7 @@
 #include <algorithm>
 
 
+
 using std::string;
 using std::pair;
 using std::list;
@@ -564,13 +565,6 @@ public:
         resistors = list<Resistor>();
         voltageSources = list<VoltageSource>();
         currentSources = list<CurrentSource>();
-    }
-
-    Branch(const Branch &b) {
-        this->id = b.id;
-        this->nodes = b.nodes;
-        std::copy(b.currentSources.begin(), b.currentSources.end() , std::back_inserter(currentSources));
-        this->current = b.current;
     }
 
     explicit Branch() = default;

@@ -418,19 +418,14 @@ int main() {
     Branch B13 = Branch(13, a, b);
     Branch B14 = Branch(14, b, a);
     Branch B15 = Branch(15, a, b);
-    vector<Branch> grane = {B1, B2, B3, B4,B5, B6, B7, B8, B9, B10, B11, B12};
 
+    //TEST CURRENT SOURCE
     CurrentSource C1=CurrentSource(1);
     std::list<CurrentSource> lista;
     lista.push_back(C1);
+    B5.setCurrentSources(lista);
 
-
-
-    std::cout<<lista.size()<<std::endl<<lista.empty()<<std::endl;
-    B1.setCurrentSources(lista);
-    Branch test = B1;
-    std::cout<<"---asdaf=="<<grane[0].getCurrentSources().size()<<"---asfa="<<B1.getCurrentSources().size();
-
+    vector<Branch> grane = {B1, B2, B3, B4,B5, B6, B7, B8, B9, B10, B11, B12};
     Circuit krug1;
     krug1.setBranches(grane);
 
