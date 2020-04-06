@@ -227,7 +227,7 @@ void Circuit::addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNo
     AmpermeterWrapper ampermeterWrapper(a, newBranch, &newBranch.getResistors().front());
     ampermeters.push_back(ampermeterWrapper);
 }
-
+//Returns all branches in the circuit that do not have Current Source
 vector<Branch> Circuit::getBranchesWithoutCurrentSource() {
     vector<Branch> branchesWithoutCurrentSource;
     for (auto b: branches)
@@ -235,6 +235,7 @@ vector<Branch> Circuit::getBranchesWithoutCurrentSource() {
     return branchesWithoutCurrentSource;
 }
 
+//Check whether the given Node is in the Vector
 bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &visitedNodes) {
     for (int i = 0; i < visitedNodes.size(); i++) {
         if (nodeToCheck == visitedNodes[i])
@@ -242,13 +243,15 @@ bool Circuit::isNodeInNodeVector(const Node &nodeToCheck, const vector<Node> &vi
     }
     return false;
 }
-vector<Branch> Circuit::getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck){
+//It is important to avoid branches that have Current Sources getBranchesWithoutCurrentSourceFromVector returns all branches that don't contain CS
+vector<Branch> Circuit::getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck) {
     vector<Branch> vectorToReturn;
-    for(auto b : vectorToCheck){
-        if(!b.hasCurrentSources()) vectorToReturn.push_back(b);
+    for (auto b : vectorToCheck) {
+        if (!b.hasCurrentSources()) vectorToReturn.push_back(b);
     }
     return vectorToReturn;
 }
+//Minimum Spanning Tree returns vector of Branches that make the MST
 vector<Branch> Circuit::getMinimumSpanningTree() {
     Node startingNode = branches[0].getFirstNode();
     Node currentNode = startingNode;
@@ -257,7 +260,7 @@ vector<Branch> Circuit::getMinimumSpanningTree() {
     std::stack<Node> orderOfVisitedNodes;
     while (true) {
         vector<Branch> branchesContainingNode = this->getBranchesContainingNode(currentNode);
-        branchesContainingNode=getBranchesWithoutCurrentSourceFromVector(branchesContainingNode);
+        branchesContainingNode = getBranchesWithoutCurrentSourceFromVector(branchesContainingNode);
         if (currentNode == startingNode && isNodeInNodeVector(startingNode, visitedNodes))
             break;
         visitedNodes.push_back(currentNode);
@@ -295,6 +298,7 @@ bool Circuit::isBranchInTheTree(Branch branchToCheck) {
     return false;
 }
 
+//CoTree represents vector of branches that are not in the Minimum Spanning tree -- These branches are used in Loops
 vector<Branch> Circuit::getCoTree() {
     vector<Branch> minimumSpanningTree = getMinimumSpanningTree();
     vector<Branch> freeBranches;
@@ -302,11 +306,13 @@ vector<Branch> Circuit::getCoTree() {
         if (!isBranchInTheTree(branches[i]))
             freeBranches.push_back(branches[i]);
     }
-    freeBranches=getBranchesWithoutCurrentSourceFromVector(freeBranches);
+    freeBranches = getBranchesWithoutCurrentSourceFromVector(freeBranches);
     return freeBranches;
 }
 
-
+//Loops are used to make equations in the Second Kirchoffs Law -- Function getLoops() return matrix of elements
+//Each row represents one loop, number of rows = number of loops
+//Each element represents branch entering the given loop
 vector<vector<Branch>> Circuit::getLoops() {
     vector<Branch> currentLoop;
     vector<Branch> freeBranches = getCoTree();
@@ -357,13 +363,20 @@ vector<vector<Branch>> Circuit::getLoops() {
     return loops;
 }
 
-bool Circuit::doesNodeContainBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode) {
-    for (auto b : branchesContainingNode) {
+int Circuit::getnumberOfLoops() {
+    return getLoops().size();
+}
+//Function isBranchInTheVector returns true if the given branch is in the Vector
+bool Circuit::isBranchInTheVector(const Branch &branchToCheck, const vector<Branch> &vectorBranches) {
+    for (auto b : vectorBranches) {
         if (b == branchToCheck) return true;
     }
     return false;
 }
 
+//First Kirchoffs Law returning the int matrix of elements
+//Rows representing Nodes for Kirchoffs Law, the number of Rows is numberOfNodes - 1
+//Coloumns represent currents which are sorted same as the branches in branches vector of a circuit
 vector<vector<int>> Circuit::firstKirchhoffRule() {
     int numberOfNodes = getNumberOfNodes();
     vector<vector<int>> matrixOfCurrents;
@@ -374,13 +387,12 @@ vector<vector<int>> Circuit::firstKirchhoffRule() {
     for (const auto &n : nodesInTheCircuit) {
         currentEquation.clear();
         branchesContainingNode = getBranchesContainingNode(n);
-        for (const auto &b : branches){
-            if(doesNodeContainBranch(b,branchesContainingNode)){
-                if(n == b.getFirstNode())
+        for (const auto &b : branches) {
+            if (isBranchInTheVector(b, branchesContainingNode)) {
+                if (n == b.getFirstNode())
                     currentEquation.push_back(-1);
-                else if(n==b.getSecondNode()) currentEquation.push_back(1);
-            }
-            else currentEquation.push_back(0);
+                else if (n == b.getSecondNode()) currentEquation.push_back(1);
+            } else currentEquation.push_back(0);
         }
 
         matrixOfCurrents.push_back(currentEquation);
@@ -394,6 +406,70 @@ std::ostream &operator<<(std::ostream &os, const Circuit &c) {
     }
     return os;
 }
+
+bool Circuit::isBranchInTheLoop(Branch branchToCheck, int indexOfALoop) {
+    vector<Branch> loopToCheck = getLoops().at(indexOfALoop);
+    for (int i = 0; i < loopToCheck.size(); i++) {
+        if (branchToCheck == loopToCheck.at(i))return true;
+    }
+    return false;
+}
+
+Node Circuit::commonNode(Branch firstBranch, Branch secondBranch) {
+    if (firstBranch.getFirstNode() == secondBranch.getFirstNode() ||
+        firstBranch.getFirstNode() == secondBranch.getSecondNode())
+        return firstBranch.getFirstNode();
+    return firstBranch.getSecondNode();
+}
+
+//indexOfABranchInBranches returns the index value of a branch in branches vector of a circuit
+int Circuit::indexOfABranchInBranches(Branch branchToCheck) {
+    for (int i = 0; i < getNumberOfBranches(); i++) {
+        if (branchToCheck == branches.at(i)) return i;
+    }
+    return -1;
+}
+//Second Kirchoffs Law returning matrix of double elements
+//Rows represent Loops -- Number of loops = number of rows
+//Coloumns represent voltage drops on each Branch, Branches are sorted same as vector Branches of the circuit
+//Last Coloumn represents sum of all Voltage Sources in the loop
+std::vector<std::vector<double>> Circuit::secondKirchoffRule() {
+    vector<vector<Branch>> loopsInCircuit = getLoops();
+    vector<vector<double>> matrixSecondKirchoffRule;
+    vector<double> currentEquation;
+    vector<Branch> currentLoop;
+    double resistanceOfABranch;
+    double voltageOfABranch;
+    double sumOfVoltageSourcesInLoop = 0;
+    for (int i = 0; i < getnumberOfLoops(); i++) { // i represents index number of a loop in a loop matrix, rows represent loops
+        sumOfVoltageSourcesInLoop = 0;
+        currentEquation.clear();
+        currentEquation.resize(getNumberOfBranches(),0); //make placeholders in currentEquation
+        currentLoop = loopsInCircuit.at(i);
+        //Go through the Loop
+        for (int j = 0; j < currentLoop.size(); j++) {
+            int indexOfABranchInBranchesVector = indexOfABranchInBranches(currentLoop.at(j));
+            Node commonNodeOfBranches;
+            //check the direction of the loop (checking which node is the common node for this branch and the next one)
+            if (j != currentLoop.size() - 1) //If this is the last branch in the loop, check it with the first (starting one)
+                commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(j + 1));
+            else commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(0)); //else check it with the next one
+            resistanceOfABranch = currentLoop.at(j).getResistance();
+            voltageOfABranch = currentLoop.at(i).getVoltageFromVoltageSources();
+            if (commonNodeOfBranches == currentLoop.at(j).getFirstNode()) {
+                currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
+                sumOfVoltageSourcesInLoop -= voltageOfABranch;
+            } else {
+                currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch * (-1);
+                sumOfVoltageSourcesInLoop += voltageOfABranch;
+            }
+        }
+        currentEquation.push_back(sumOfVoltageSourcesInLoop);
+        matrixSecondKirchoffRule.push_back(currentEquation);
+    }
+    return matrixSecondKirchoffRule;
+}
+
 
 int main() {
     Node a(1);
@@ -420,12 +496,12 @@ int main() {
     Branch B15 = Branch(15, a, b);
 
     //TEST CURRENT SOURCE
-    CurrentSource C1=CurrentSource(1);
+    CurrentSource C1 = CurrentSource(1);
     std::list<CurrentSource> lista;
     lista.push_back(C1);
     B5.setCurrentSources(lista);
 
-    vector<Branch> grane = {B1, B2, B3, B4,B5, B6, B7, B8, B9, B10, B11, B12};
+    vector<Branch> grane = {B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12};
     Circuit krug1;
     krug1.setBranches(grane);
 

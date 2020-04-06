@@ -75,7 +75,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const Circuit &C);
 
-    static bool doesNodeContainBranch(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
+    static bool isBranchInTheVector(const Branch &branchToCheck, const vector<Branch> &branchesContainingNode);
 
     void addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondID);
 
@@ -88,6 +88,16 @@ public:
     vector<Branch> getBranchesWithoutCurrentSource();
 
     vector<Branch> getBranchesWithoutCurrentSourceFromVector(vector<Branch> vectorToCheck);
+
+    vector<std::vector<double>> secondKirchoffRule();
+
+    bool isBranchInTheLoop(Branch branchToCheck, int IndexOfALoop);
+
+    int getnumberOfLoops();
+
+    Node commonNode(Branch firstBranch, Branch secondBranch);
+
+    int indexOfABranchInBranches(Branch branchToCheck);
 };
 
 
