@@ -97,7 +97,7 @@ public:
 
     Node commonNode(Branch firstBranch, Branch secondBranch);
 
-    int indexOfABranchInBranches(Branch branchToCheck);
+    int getIndexOfABranchInBranches(Branch branchToCheck);
 };
 
 

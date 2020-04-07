@@ -426,8 +426,8 @@ Node Circuit::commonNode(Branch firstBranch, Branch secondBranch) {
     return firstBranch.getSecondNode();
 }
 
-//indexOfABranchInBranches returns the index value of a branch in branches vector of a circuit
-int Circuit::indexOfABranchInBranches(Branch branchToCheck) {
+//getIndexOfABranchInBranches returns the index value of a branch in branches vector of a circuit
+int Circuit::getIndexOfABranchInBranches(Branch branchToCheck) {
     for (int i = 0; i < getNumberOfBranches(); i++) {
         if (branchToCheck == branches.at(i)) return i;
     }
@@ -457,7 +457,7 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
         //Go through the Loop
 
         for (int j = 0; j < currentLoop.size(); j++) {
-            int indexOfABranchInBranchesVector = indexOfABranchInBranches(currentLoop.at(j));
+            int indexOfABranchInBranchesVector = getIndexOfABranchInBranches(currentLoop.at(j));
             Node commonNodeOfBranches;
             //check the direction of the loop (checking which node is the common node for this branch and the next one)
             if (j !=
@@ -479,7 +479,7 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
                     //second branch
                     resistanceOfABranch = currentLoop.at(1).getResistance();
                     voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
-                    indexOfABranchInBranchesVector=indexOfABranchInBranches(currentLoop.at(1));
+                    indexOfABranchInBranchesVector= getIndexOfABranchInBranches(currentLoop.at(1));
                     currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch*(-1);
                     sumOfVoltageSourcesInLoop+=voltageOfABranch;
                 }
@@ -492,7 +492,7 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
                     //second branch
                     resistanceOfABranch = currentLoop.at(1).getResistance();
                     voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
-                    indexOfABranchInBranchesVector=indexOfABranchInBranches(currentLoop.at(1));
+                    indexOfABranchInBranchesVector= getIndexOfABranchInBranches(currentLoop.at(1));
                     currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch;
                     sumOfVoltageSourcesInLoop-=voltageOfABranch;
                 }
