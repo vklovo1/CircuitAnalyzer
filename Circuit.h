@@ -98,6 +98,8 @@ public:
     Node commonNode(Branch firstBranch, Branch secondBranch);
 
     int getIndexOfABranchInBranches(Branch branchToCheck);
+
+    vector<double> measureCurrentsOfACircuit();
 };
 
 

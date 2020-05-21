@@ -515,6 +515,47 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
 }
 
 
+
+
+
+vector<double> Circuit::measureCurrentsOfACircuit(){
+    vector<vector<int>> firstKirchoffsLawMatrix = firstKirchhoffsLaw();
+    vector<vector<double>> secondKirchoffsLawMatrix = secondKirchoffsLaw();
+
+    vector<vector<double>> finalCurrentMatrix;
+
+   for(auto i : firstKirchoffsLawMatrix){
+       vector<double> vectorRow;
+       vectorRow.clear();
+       for(auto j : i){
+           vectorRow.push_back((double) j);
+       }
+       finalCurrentMatrix.push_back(vectorRow);
+   }
+   for(auto i : secondKirchoffsLawMatrix){
+       vector<double> vectorRow;
+       vectorRow.clear();
+       for(auto j : i){
+           if(j == i.at(i.size()-1))break;
+           else vectorRow.push_back(j);
+       }
+       finalCurrentMatrix.push_back(vectorRow);
+   }
+
+
+
+   std::cout<<std::endl;
+    for(auto i : finalCurrentMatrix){
+        for(auto j : i){
+            std::cout<<j<<" ";
+        }
+        std::cout<<std::endl;
+    }
+    return finalCurrentMatrix.at(0);
+    
+}
+
+
 int main() {
     Node a(1);
     Node b(2);
@@ -622,6 +663,7 @@ int main() {
             std::cout << j << " ";
         std::cout << std::endl;
     }
+    krug1.measureCurrentsOfACircuit();
 }
 
 /*  int main() {
