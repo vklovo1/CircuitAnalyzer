@@ -511,6 +511,26 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
         currentEquation.push_back(sumOfVoltageSourcesInLoop);
         matrixSecondKirchoffRule.push_back(currentEquation);
     }
+    vector<double> equationForCurrentSources;
+    bool isThereCurrentSource = false;
+    for(auto b:branches){
+        equationForCurrentSources = vector<double> (getNumberOfBranches(),0.0);
+        isThereCurrentSource=false;
+        if(b.hasCurrentSources()) {
+            isThereCurrentSource = true;
+            equationForCurrentSources.at(5)=1;
+
+            double current=0;
+            for(auto c : b.getCurrentSources()) {
+                current=c.getCurrent()*(-1);
+                break;
+            }
+
+            equationForCurrentSources.push_back(current);
+        }
+        if(isThereCurrentSource) matrixSecondKirchoffRule.push_back(equationForCurrentSources);
+    }
+
     return matrixSecondKirchoffRule;
 }
 
@@ -523,8 +543,12 @@ vector<double> Circuit::measureCurrentsOfACircuit(){
     vector<vector<int>> firstKirchoffsLawMatrix = firstKirchhoffsLaw();
     vector<vector<double>> secondKirchoffsLawMatrix = secondKirchoffsLaw();
     firstKirchoffsLawMatrix.erase(firstKirchoffsLawMatrix.begin()+firstKirchoffsLawMatrix.size()-1);
-
     int numberOfEquations = firstKirchoffsLawMatrix.size() + secondKirchoffsLawMatrix.size();
+
+
+
+
+
 
     vector<vector<double>> equationMatrix;
 
@@ -569,13 +593,14 @@ vector<double> Circuit::measureCurrentsOfACircuit(){
 
 
 
-   std::cout<<sourcesMatrix<<std::endl;
-   std::cout<<finalMatrix<<std::endl;
-   std::cout<<currentMatrix<<std::endl;
    for(int i = 0; i < getNumberOfBranches(); i++){
        currentsInTheCircuit.push_back(currentMatrix.m_pData[i][0]);
    }
 
+   //set currents
+   for(int i = 0; i < getNumberOfBranches(); i++){
+       branches.at(i).setCurrent(currentsInTheCircuit.at(i));
+   }
 
     return currentsInTheCircuit;
     
@@ -613,21 +638,10 @@ int main() {
     Branch B5 = Branch(5, c, a);
 
     Branch B6 = Branch(6, d, a);
-    B6.addResistor(1000);
-    B6.addVoltageSource(v3);
-
-
-
-
-
-
-
-
-    //TEST CURRENT SOURCE
-    CurrentSource C1 = CurrentSource(1);
-    std::list<CurrentSource> lista;
-    lista.push_back(C1);
-    //B5.setCurrentSources(lista);
+    //B6.addVoltageSource(v3);
+   // B6.addResistor(1000);
+    CurrentSource C1 = CurrentSource(1,0.5);
+    B6.addCurrentSource(C1);
 
     vector<Branch> grane = {B1, B2, B3,B4,B5,B6};
     Circuit krug1;
@@ -681,7 +695,10 @@ int main() {
     }
     vector<double> currentsInTheCircuit = krug1.measureCurrentsOfACircuit();
     for(auto i: currentsInTheCircuit){
-        std::cout<<i<<"mA, ";
+        std::cout<<i<<"A, ";
+    }
+    for(auto b : krug1.getBranches()){
+        std::cout<<b.getCurrent()<<"A, ";
     }
 }
 
