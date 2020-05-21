@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include "Circuit.h"
-
+#include "CMatrix.h"
 
 Circuit::Circuit(const vector<Branch> &branches) {
     this->branches = branches;
@@ -519,10 +519,24 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
 
 
 vector<double> Circuit::measureCurrentsOfACircuit(){
+    vector<double> currentsInTheCircuit = {};
     vector<vector<int>> firstKirchoffsLawMatrix = firstKirchhoffsLaw();
     vector<vector<double>> secondKirchoffsLawMatrix = secondKirchoffsLaw();
+    firstKirchoffsLawMatrix.erase(firstKirchoffsLawMatrix.begin()+firstKirchoffsLawMatrix.size()-1);
 
-    vector<vector<double>> finalCurrentMatrix;
+    int numberOfEquations = firstKirchoffsLawMatrix.size() + secondKirchoffsLawMatrix.size();
+
+    vector<vector<double>> equationMatrix;
+
+    for(auto i : secondKirchoffsLawMatrix){
+        vector<double> vectorRow;
+        vectorRow.clear();
+        for(auto j : i){
+            if(j == i.at(i.size()-1))break;
+            else vectorRow.push_back(j);
+        }
+        equationMatrix.push_back(vectorRow);
+    }
 
    for(auto i : firstKirchoffsLawMatrix){
        vector<double> vectorRow;
@@ -530,28 +544,40 @@ vector<double> Circuit::measureCurrentsOfACircuit(){
        for(auto j : i){
            vectorRow.push_back((double) j);
        }
-       finalCurrentMatrix.push_back(vectorRow);
+       equationMatrix.push_back(vectorRow);
    }
-   for(auto i : secondKirchoffsLawMatrix){
-       vector<double> vectorRow;
-       vectorRow.clear();
-       for(auto j : i){
-           if(j == i.at(i.size()-1))break;
-           else vectorRow.push_back(j);
+
+
+   CMatrix finalMatrix("finalMatrixOfEquations", equationMatrix.size(), getNumberOfBranches());
+
+   for(int i = 0; i < equationMatrix.size(); i++){
+       for(int j = 0; j < equationMatrix.at(i).size(); j++){
+           finalMatrix.m_pData[i][j] = equationMatrix.at(i).at(j);
        }
-       finalCurrentMatrix.push_back(vectorRow);
+   }
+
+   CMatrix sourcesMatrix("sourcesMatrix", getNumberOfBranches(), 1);
+    for(int i = 0; i < secondKirchoffsLawMatrix.size(); i++){
+            sourcesMatrix.m_pData[i][0] = secondKirchoffsLawMatrix.at(i).at(secondKirchoffsLawMatrix.at(i).size()-1) * (-1); // EQUATIONS * CURRENT + SOURCES = 0, *(-1) to shift SOURCES to right side
+    }
+
+
+   CMatrix currentMatrix("currentMatrix",getNumberOfBranches(),1);
+
+   finalMatrix = finalMatrix.Inverse();
+   currentMatrix = finalMatrix * sourcesMatrix;
+
+
+
+   std::cout<<sourcesMatrix<<std::endl;
+   std::cout<<finalMatrix<<std::endl;
+   std::cout<<currentMatrix<<std::endl;
+   for(int i = 0; i < getNumberOfBranches(); i++){
+       currentsInTheCircuit.push_back(currentMatrix.m_pData[i][0]);
    }
 
 
-
-   std::cout<<std::endl;
-    for(auto i : finalCurrentMatrix){
-        for(auto j : i){
-            std::cout<<j<<" ";
-        }
-        std::cout<<std::endl;
-    }
-    return finalCurrentMatrix.at(0);
+    return currentsInTheCircuit;
     
 }
 
@@ -564,56 +590,46 @@ int main() {
     Node e(5);
     Node f(6);
     Node g(7);
-    Branch B1 = Branch(1, a, f);
-    Branch B2 = Branch(2, f, c);
-    Branch B3 = Branch(3, c, e);
-    Branch B4 = Branch(4, e, g);
-    Branch B5 = Branch(5, g, d);
-    Branch B6 = Branch(6, d, a);
-    Branch B7 = Branch(7, a, b);
-    Branch B8 = Branch(8, b, d);
-    Branch B9 = Branch(9, d, e);
-    Branch B10 = Branch(10, e, b);
-    Branch B11 = Branch(11, b, c);
-    Branch B12 = Branch(12, b, f);
-    Branch B13 = Branch(13, a, b);
-    Branch B14 = Branch(14, b, a);
-    Branch B15 = Branch(15, a, b);
-    //Add some components
-    B1.addResistor(100);
-    B2.addResistor(200);
-    B3.addResistor(300);
-    B4.addResistor(400);
-    B6.addResistor(600);
-    B7.addResistor(700);
-    B9.addResistor(900);
-    B8.addResistor(240);
-    B10.addResistor(1000);
-    VoltageSource v1(1, 20);
-    VoltageSource v2(2, 70);
-    VoltageSource v3(3, 30, 0, false);
-    VoltageSource v4(4, 50);
-    VoltageSource v5(5, 90, 0, false);
-    VoltageSource v6(6, 40, 0, false);
-    B11.addVoltageSource(v2);
-    B1.addVoltageSource(v1);
-    B2.addVoltageSource(v2);
-    B1.addVoltageSource(v3);
-    B4.addVoltageSource(v4);
-    B8.addVoltageSource(v5);
 
-    B13.addResistor(250);
-    B13.addVoltageSource(v3);
-    B14.addResistor(500);
-    B15.addResistor(2450);
+
+    VoltageSource v1(1, 5);
+    VoltageSource v2(2, 10);
+    VoltageSource v3(3, 10, 0, false);
+
+    Branch B1 = Branch(1, a, b);
+    B1.addResistor(2000);
+
+
+    Branch B2 = Branch(2, b, c);
+    B2.addResistor(1000);
+    B2.addVoltageSource(v1);
+
+    Branch B3 = Branch(3, b, d);
+    B3.addVoltageSource(v2);
+
+    Branch B4 = Branch(4, d, c);
+    B4.addResistor(1000);
+
+    Branch B5 = Branch(5, c, a);
+
+    Branch B6 = Branch(6, d, a);
+    B6.addResistor(1000);
+    B6.addVoltageSource(v3);
+
+
+
+
+
+
+
 
     //TEST CURRENT SOURCE
     CurrentSource C1 = CurrentSource(1);
     std::list<CurrentSource> lista;
     lista.push_back(C1);
-    B5.setCurrentSources(lista);
+    //B5.setCurrentSources(lista);
 
-    vector<Branch> grane = {B13, B14, B15};
+    vector<Branch> grane = {B1, B2, B3,B4,B5,B6};
     Circuit krug1;
     krug1.setBranches(grane);
 
@@ -663,7 +679,10 @@ int main() {
             std::cout << j << " ";
         std::cout << std::endl;
     }
-    krug1.measureCurrentsOfACircuit();
+    vector<double> currentsInTheCircuit = krug1.measureCurrentsOfACircuit();
+    for(auto i: currentsInTheCircuit){
+        std::cout<<i<<"mA, ";
+    }
 }
 
 /*  int main() {
