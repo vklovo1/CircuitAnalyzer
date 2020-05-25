@@ -6,6 +6,7 @@
 #include <algorithm>
 
 
+
 using std::string;
 using std::pair;
 using std::list;
@@ -36,7 +37,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0) throw std::domain_error("IDs start at 0!");
+        if (id < 0) throw std::domain_error("IDs start at 0!");
         VoltageSource::id = id;
     }
 
@@ -45,7 +46,7 @@ public:
     }
 
     void setVoltage(double voltage) {
-        if(voltage < 0) {
+        if (voltage < 0) {
             voltage *= -1;
             toggleOrientation();
         }
@@ -57,7 +58,7 @@ public:
     }
 
     void setInternalResistance(double internalResistance) {
-        if(internalResistance < 0)
+        if (internalResistance < 0)
             throw std::domain_error("Resistance can't be negative!");
         VoltageSource::internalResistance = internalResistance;
     }
@@ -84,27 +85,27 @@ public:
 
     //operators
 
-    friend bool operator == (const VoltageSource &e1, const VoltageSource &e2) {
+    friend bool operator==(const VoltageSource &e1, const VoltageSource &e2) {
         return e1.id == e2.id;
     }
 
-    friend bool operator != (const VoltageSource &e1, const VoltageSource &e2) {
+    friend bool operator!=(const VoltageSource &e1, const VoltageSource &e2) {
         return !(e1 == e2);
     }
 
-    friend bool operator < (const VoltageSource &e1, const VoltageSource &e2) {
+    friend bool operator<(const VoltageSource &e1, const VoltageSource &e2) {
         return e1.id < e2.id;
     }
 
-    friend bool operator <= (const VoltageSource &e1, const VoltageSource &e2) {
+    friend bool operator<=(const VoltageSource &e1, const VoltageSource &e2) {
         return e1 < e2 || e1 == e2;
     }
 
-    VoltageSource &operator +=(const VoltageSource &e) { //sources in series
-        if(this->naturalOrientation == e.naturalOrientation)
+    VoltageSource &operator+=(const VoltageSource &e) { //sources in series
+        if (this->naturalOrientation == e.naturalOrientation)
             this->voltage += e.voltage;
         else {
-            if(this->voltage > e.voltage)
+            if (this->voltage > e.voltage)
                 this->voltage = this->voltage - e.voltage;
             else {
                 this->toggleOrientation();
@@ -116,8 +117,8 @@ public:
         return *this;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const VoltageSource &e) {
-        if(e.isNaturalOrientation())
+    friend std::ostream &operator<<(std::ostream &os, const VoltageSource &e) {
+        if (e.isNaturalOrientation())
             os << "E" << e.getId() << " (" << e.getVoltage() << "V)+";
         else
             os << "E" << e.getId() << " +(" << e.getVoltage() << "V)";
@@ -149,7 +150,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0)
+        if (id < 0)
             throw std::domain_error("IDs start at 0!");
         CurrentSource::id = id;
     }
@@ -159,7 +160,7 @@ public:
     }
 
     void setCurrent(double current) {
-        if(current < 0) {
+        if (current < 0) {
             current *= -1;
             this->naturalOrientation = !this->naturalOrientation;
         }
@@ -171,7 +172,7 @@ public:
     }
 
     void setInternalResistance(double internalResistance) {
-        if(internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
+        if (internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
             throw std::domain_error("Resistance can't be negative!");
         this->internalResistance = internalResistance;
     }
@@ -198,25 +199,24 @@ public:
 
     //operators
 
-    friend bool operator == (const CurrentSource &i1, const CurrentSource &i2) {
+    friend bool operator==(const CurrentSource &i1, const CurrentSource &i2) {
         return i1.id == i2.id;
     }
 
-    friend bool operator != (const CurrentSource &i1, const CurrentSource &i2) {
+    friend bool operator!=(const CurrentSource &i1, const CurrentSource &i2) {
         return !(i1 == i2);
     }
 
-    friend bool operator < (const CurrentSource &i1, const CurrentSource &i2) {
+    friend bool operator<(const CurrentSource &i1, const CurrentSource &i2) {
         return i1.id < i2.id;
     }
 
-    friend bool operator <= (const CurrentSource &i1, const CurrentSource &i2) {
+    friend bool operator<=(const CurrentSource &i1, const CurrentSource &i2) {
         return i1 < i2 || i1 == i2;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const CurrentSource &i)
-    {
-        if(i.isNaturalOrientation())
+    friend std::ostream &operator<<(std::ostream &os, const CurrentSource &i) {
+        if (i.isNaturalOrientation())
             os << "I" << i.getId() << " (" << i.getCurrent() << "A->)";
         else
             os << "I" << i.getId() << " (<-" << i.getCurrent() << "A)";
@@ -230,7 +230,7 @@ class Resistor {
     int id;
     double resistance;
 public:
-    Resistor(double resistance = 100, int id = -1){
+    Resistor(double resistance = 100, int id = -1) {
         setId(id);
         setResistance(resistance);
     }
@@ -242,7 +242,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0 && id != -1)
+        if (id < 0 && id != -1)
             throw std::domain_error("IDs start at 0!");
         Resistor::id = id;
     }
@@ -252,7 +252,7 @@ public:
     }
 
     void setResistance(double resistance) {
-        if(resistance < 0) throw std::domain_error("Resistance can't be negative!");
+        if (resistance < 0) throw std::domain_error("Resistance can't be negative!");
         this->resistance = resistance;
     }
 
@@ -262,29 +262,28 @@ public:
 
     //operators
 
-    friend bool operator == (const Resistor &r1, const Resistor &r2) {
+    friend bool operator==(const Resistor &r1, const Resistor &r2) {
         return r1.id == r2.id;
     }
 
-    friend bool operator != (const Resistor &r1, const Resistor &r2) {
+    friend bool operator!=(const Resistor &r1, const Resistor &r2) {
         return !(r1 == r2);
     }
 
-    friend bool operator < (const Resistor &r1, const Resistor &r2) {
+    friend bool operator<(const Resistor &r1, const Resistor &r2) {
         return r1.id < r2.id;
     }
 
-    friend bool operator <= (const Resistor &r1, const Resistor &r2) {
+    friend bool operator<=(const Resistor &r1, const Resistor &r2) {
         return r1 < r2 || r1 == r2;
     }
 
-    Resistor &operator +=(const Resistor &r) { //resistors in series
+    Resistor &operator+=(const Resistor &r) { //resistors in series
         this->resistance += r.resistance;
         return *this;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Resistor &r)
-    {
+    friend std::ostream &operator<<(std::ostream &os, const Resistor &r) {
         os << "R" << r.getId() << " -[" << r.getResistance() << "Ohm]-";
         return os;
     }
@@ -311,7 +310,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0) throw std::domain_error("IDs start at 0!");
+        if (id < 0) throw std::domain_error("IDs start at 0!");
         Voltmeter::id = id;
     }
 
@@ -328,7 +327,7 @@ public:
     }
 
     void setInternalResistance(double internalResistance) {
-        if(internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
+        if (internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
             throw std::domain_error("Resistance can't be negative!");
         Voltmeter::internalResistance = internalResistance;
     }
@@ -346,7 +345,7 @@ public:
     }
 
     bool isIdeal() const {
-        return fabs(1+internalResistance) < EPSILON;
+        return fabs(1 + internalResistance) < EPSILON;
     }
 
     void setIdeal() {
@@ -355,25 +354,24 @@ public:
 
     //operators
 
-    friend bool operator == (const Voltmeter &e1, const Voltmeter &e2) {
+    friend bool operator==(const Voltmeter &e1, const Voltmeter &e2) {
         return e1.id == e2.id;
     }
 
-    friend bool operator != (const Voltmeter &e1, const Voltmeter &e2) {
+    friend bool operator!=(const Voltmeter &e1, const Voltmeter &e2) {
         return !(e1 == e2);
     }
 
-    friend bool operator < (const Voltmeter &e1, const Voltmeter &e2) {
+    friend bool operator<(const Voltmeter &e1, const Voltmeter &e2) {
         return e1.id < e2.id;
     }
 
-    friend bool operator <= (const Voltmeter &e1, const Voltmeter &e2) {
+    friend bool operator<=(const Voltmeter &e1, const Voltmeter &e2) {
         return e1 < e2 || e1 == e2;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Voltmeter &v)
-    {
-        if(v.isNaturalOrientation())
+    friend std::ostream &operator<<(std::ostream &os, const Voltmeter &v) {
+        if (v.isNaturalOrientation())
             os << "V" << v.getId() << " ([" << v.getVoltage() << "V])+";
         else
             os << "V" << v.getId() << " +([" << v.getVoltage() << "V])";
@@ -401,7 +399,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0)
+        if (id < 0)
             throw std::domain_error("IDs start at 0!");
         Ampermeter::id = id;
     }
@@ -419,7 +417,7 @@ public:
     }
 
     void setInternalResistance(double internalResistance) {
-        if(internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
+        if (internalResistance < 0 && fabs(1 + internalResistance) > EPSILON)
             throw std::domain_error("Resistance can't be negative!");
         this->internalResistance = internalResistance;
     }
@@ -446,25 +444,24 @@ public:
 
     //operators
 
-    friend bool operator == (const Ampermeter &a1, const Ampermeter &a2) {
+    friend bool operator==(const Ampermeter &a1, const Ampermeter &a2) {
         return a1.id == a2.id;
     }
 
-    friend bool operator != (const Ampermeter &a1, const Ampermeter &a2) {
+    friend bool operator!=(const Ampermeter &a1, const Ampermeter &a2) {
         return !(a1 == a2);
     }
 
-    friend bool operator < (const Ampermeter &a1, const Ampermeter &a2) {
+    friend bool operator<(const Ampermeter &a1, const Ampermeter &a2) {
         return a1.id < a2.id;
     }
 
-    friend bool operator <= (const Ampermeter &a1, const Ampermeter &a2) {
+    friend bool operator<=(const Ampermeter &a1, const Ampermeter &a2) {
         return a1 < a2 || a1 == a2;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Ampermeter &a)
-    {
-        if(a.isNaturalOrientation())
+    friend std::ostream &operator<<(std::ostream &os, const Ampermeter &a) {
+        if (a.isNaturalOrientation())
             os << "A" << a.getId() << " ([" << a.getCurrent() << "A]->)";
         else
             os << "I" << a.getId() << " (<-[" << a.getCurrent() << "A])";
@@ -497,7 +494,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0)
+        if (id < 0)
             throw std::range_error("IDs start at 0!");
         Node::id = id;
     }
@@ -512,24 +509,23 @@ public:
 
     //operators
 
-    friend bool operator == (const Node &n1, const Node &n2) {
+    friend bool operator==(const Node &n1, const Node &n2) {
         return n1.id == n2.id;
     }
 
-    friend bool operator != (const Node &n1, const Node &n2) {
+    friend bool operator!=(const Node &n1, const Node &n2) {
         return !(n1 == n2);
     }
 
-    friend bool operator < (const Node &n1, const Node &n2) {
+    friend bool operator<(const Node &n1, const Node &n2) {
         return n1.id < n2.id;
     }
 
-    friend bool operator <= (const Node &n1, const Node &n2) {
+    friend bool operator<=(const Node &n1, const Node &n2) {
         return n1 < n2 || n1 == n2;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Node &n)
-    {
+    friend std::ostream &operator<<(std::ostream &os, const Node &n) {
         os << "N" << n.getId() << "(" << n.getVoltage() << "V)";
         return os;
     }
@@ -553,8 +549,9 @@ class Branch {
     double current = 0;
 public:
 
-    Branch(int id, const Node &n1, const Node &n2, const list<Resistor> &resistors, const list <VoltageSource> &voltageSources,
-           const list <CurrentSource> &currentSources) {
+    Branch(int id, const Node &n1, const Node &n2, const list<Resistor> &resistors,
+           const list<VoltageSource> &voltageSources,
+           const list<CurrentSource> &currentSources) {
         setId(id);
         setNodes(n1, n2);
         this->resistors = resistors;
@@ -579,7 +576,7 @@ public:
     }
 
     void setId(int id) {
-        if(id < 0)
+        if (id < 0)
             throw std::range_error("IDs start at 0!");
         Branch::id = id;
     }
@@ -677,18 +674,19 @@ public:
     double getResistance() {
         double resistance = 0;
 
-        for(auto r : resistors) {
-            if(r.hasInfiniteResistance()) {
+        for (auto r : resistors) {
+            if (r.hasInfiniteResistance()) {
                 resistance = -1;
                 break;
             } else resistance += r.getResistance();
         }
+        return resistance;
     }
 
     double getVoltageFromVoltageSources() const {
         double voltage = 0;
         std::for_each(voltageSources.begin(), voltageSources.end(), [&voltage](VoltageSource v) -> void {
-            if(v.isNaturalOrientation()) voltage += v.getVoltage();
+            if (v.isNaturalOrientation()) voltage += v.getVoltage();
             else voltage -= v.getVoltage();
         });
         return voltage;
@@ -696,7 +694,7 @@ public:
 
     double getCurrentFromCurrentSources() const {
         double current = 0;
-        if(currentSources.empty()) return current;
+        if (currentSources.empty()) return current;
 
         return currentSources.front().getCurrent();
     }
@@ -706,16 +704,16 @@ public:
     }
 
     void addVoltageSource(const VoltageSource &v) {
-        if(!v.isIdeal())
+        if (!v.isIdeal())
             resistors.emplace_back(v.getInternalResistance());
         voltageSources.push_back(v);
     }
 
     void addCurrentSource(const CurrentSource &c) {
-        if(!c.isIdeal()) throw std::range_error("Non-ideal current sources can't be added to a single branch!");
+        if (!c.isIdeal()) throw std::range_error("Non-ideal current sources can't be added to a single branch!");
         auto it = currentSources.begin();
-        while(it != currentSources.end()) {
-            if(c.getCurrent() != (*it).getCurrent())
+        while (it != currentSources.end()) {
+            if (c.getCurrent() != (*it).getCurrent())
                 throw std::range_error("Current of all current sources must be the same!");
             it++;
         }
@@ -724,32 +722,31 @@ public:
 
     //operators
 
-    friend bool operator == (const Branch &b1, const Branch &b2) {
+    friend bool operator==(const Branch &b1, const Branch &b2) {
         return b1.getId() == b2.getId();
     }
 
-    friend bool operator != (const Branch &b1, const Branch &b2) {
+    friend bool operator!=(const Branch &b1, const Branch &b2) {
         return !(b1 == b2);
     }
 
-    friend bool operator < (const Branch &b1, const Branch &b2) {
+    friend bool operator<(const Branch &b1, const Branch &b2) {
         return b1.getId() < b2.getId();
     }
 
-    friend bool operator <= (const Branch &b1, const Branch &b2) {
+    friend bool operator<=(const Branch &b1, const Branch &b2) {
         return b1 < b2 || b1 == b2;
     }
 
-    Branch &operator +=(Branch b) { //branches in series
+    Branch &operator+=(Branch b) { //branches in series
         this->resistors.splice(resistors.end(), b.getResistors());
         this->voltageSources.splice(voltageSources.end(), b.getVoltageSources());
         this->currentSources.splice(currentSources.end(), b.getCurrentSources());
         return *this;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Branch &b)
-    {
-        os <<b.getFirstNode() << "->B" << b.getId() << "(" << b.getCurrent() << "A)->" <<b.getSecondNode();
+    friend std::ostream &operator<<(std::ostream &os, const Branch &b) {
+        os << b.getFirstNode() << "->B" << b.getId() << "(" << b.getCurrent() << "A)->" << b.getSecondNode();
         return os;
     }
 };
@@ -762,9 +759,10 @@ class VoltmeterWrapper {
     std::pair<Node, Node> voltmeterNodes;
     Resistor *parasiteResistance;
 public:
-    VoltmeterWrapper(const Voltmeter &voltmeter, const Node &firstNode, const Node &secondNode, Resistor* resistor = nullptr) :
-        voltmeter(voltmeter) {
-        if(resistor == nullptr && !voltmeter.isIdeal())
+    VoltmeterWrapper(const Voltmeter &voltmeter, const Node &firstNode, const Node &secondNode,
+                     Resistor *resistor = nullptr) :
+            voltmeter(voltmeter) {
+        if (resistor == nullptr && !voltmeter.isIdeal())
             throw std::logic_error("A resistor must by provided for non-ideal voltmeters!");
         this->voltmeterNodes = std::pair<Node, Node>(firstNode, secondNode);
         parasiteResistance = resistor;
@@ -821,12 +819,13 @@ public:
 class AmpermeterWrapper {
     Ampermeter ampermeter;
     Branch ampermeterBranch;
-    Resistor* parasiteResistance;
+    Resistor *parasiteResistance;
 
 
 public:
     AmpermeterWrapper(const Ampermeter &ampermeter, const Branch &ampermeterBranch, Resistor *parasiteResistance)
             : ampermeter(ampermeter), ampermeterBranch(ampermeterBranch), parasiteResistance(parasiteResistance) {}
+
     const Ampermeter &getAmpermeter() const {
         return ampermeter;
     }
