@@ -99,7 +99,9 @@ public:
 
     int getIndexOfABranchInBranches(Branch branchToCheck);
 
-    vector<double> measureCurrentsOfACircuit();
+    vector<double> getMeasuredCurrents();
+
+    int getAvailableBranchId();
 };
 
 
