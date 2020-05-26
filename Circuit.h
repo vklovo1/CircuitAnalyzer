@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "main.cpp"
+#include "circuitutility.cpp"
 #include <stack>
 #include <memory>
 #include <utility>
@@ -99,7 +99,9 @@ public:
 
     int getIndexOfABranchInBranches(Branch branchToCheck);
 
-    vector<double> measureCurrentsOfACircuit();
+    vector<double> getMeasuredCurrents();
+
+    int getAvailableBranchId();
 };
 
 
