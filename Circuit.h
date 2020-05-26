@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "main.cpp"
+#include "circuitutility.cpp"
 #include <stack>
 #include <memory>
 #include <utility>

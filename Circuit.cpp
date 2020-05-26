@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <QTextStream>
 #include "Circuit.h"
 
 
@@ -62,13 +63,18 @@ int Circuit::getNumberOfBranchesFromNode(Node node) {
 //this method removes obsolete branches that are actually in series
 
 void Circuit::removeObsoleteBranches() {
-    for (auto &b : branches) {
+
+    for (auto i = 0; i < branches.size(); i++) {
+        Branch b = branches.at(0);
         Node nodeToGetRidOf;
-        if (getNumberOfBranchesFromNode(b.getFirstNode()) < 3)
+        if (getNumberOfBranchesFromNode(b.getFirstNode()) == 2)
             nodeToGetRidOf = b.getFirstNode();
-        else if (getNumberOfBranchesFromNode(b.getSecondNode()) < 3)
+        else if (getNumberOfBranchesFromNode(b.getSecondNode()) ==2)
             nodeToGetRidOf = b.getSecondNode();
-        else continue;
+        else {
+            i++;
+            continue;
+        }
 
         auto branchesContainingNode = getBranchesContainingNode(nodeToGetRidOf);
         auto firstBranch = branchesContainingNode[0];
@@ -121,6 +127,8 @@ void Circuit::removeObsoleteBranches() {
         removeBranch(firstBranch);
         removeBranch(secondBranch);
         addBranch(newBranch);
+
+        i = -1;
     }
 }
 
@@ -191,19 +199,19 @@ std::set<Node> Circuit::getNodes() {
 }
 
 void Circuit::addResistorToCircuit(const Resistor &r, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getAvailableBranchId(), Node(firstNodeID), Node(secondNodeID));
     newBranch.addResistor(r);
     addBranch(newBranch);
 }
 
 void Circuit::addVoltageSourceToCircuit(const VoltageSource &v, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getAvailableBranchId(), Node(firstNodeID), Node(secondNodeID));
     newBranch.addVoltageSource(v);
     addBranch(newBranch);
 }
 
 void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getAvailableBranchId(), Node(firstNodeID), Node(secondNodeID));
     addResistorToCircuit(Resistor(c.getInternalResistance()), firstNodeID, secondNodeID);
     c.setIdeal();
     newBranch.addCurrentSource(c);
@@ -211,7 +219,7 @@ void Circuit::addCurrentSourceToCircuit(CurrentSource c, int firstNodeID, int se
 }
 
 void Circuit::addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getAvailableBranchId(), Node(firstNodeID), Node(secondNodeID));
     newBranch.addResistor(Resistor(v.getInternalResistance()));
     addBranch(newBranch);
 
@@ -220,7 +228,7 @@ void Circuit::addVoltmeterToCircuit(Voltmeter v, int firstNodeID, int secondNode
 }
 
 void Circuit::addAmpermeterToCircuit(Ampermeter a, int firstNodeID, int secondNodeID) {
-    Branch newBranch(getNumberOfBranches() + 1, Node(firstNodeID), Node(secondNodeID));
+    Branch newBranch(getAvailableBranchId(), Node(firstNodeID), Node(secondNodeID));
     newBranch.addResistor(Resistor(a.getInternalResistance()));
     addBranch(newBranch);
 
@@ -538,13 +546,6 @@ vector<double> Circuit::getMeasuredCurrents(){
        finalCurrentMatrix.push_back(vectorRow);
    }
 
-   std::cout<<std::endl;
-    for(auto i : finalCurrentMatrix){
-        for(auto j : i){
-            std::cout<<j<<" ";
-        }
-        std::cout<<std::endl;
-    }
     return finalCurrentMatrix.at(0);
     
 }
@@ -560,7 +561,7 @@ int Circuit::getAvailableBranchId() {
 }
 
 
-int main() {
+/*int main() {
     Node a(1);
     Node b(2);
     Node c(3);
@@ -670,7 +671,7 @@ int main() {
     krug1.getMeasuredCurrents();
 }
 
-/*  int main() {
+  int main() {
      Circuit c;
      char choice;
      bool breakLoop = false;
