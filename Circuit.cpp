@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include "Circuit.h"
-
+#include "CMatrix.h"
 
 Circuit::Circuit(const vector<Branch> &branches) {
     this->branches = branches;
@@ -447,70 +447,96 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
     double voltageOfABranch;
     double sumOfVoltageSourcesInLoop = 0;
     Node startingNode;
-    for (int i = 0;
-         i < getnumberOfLoops(); i++) { // i represents index number of a loop in a loop matrix, rows represent loops
-        sumOfVoltageSourcesInLoop = 0;
-        currentEquation.clear();
-        currentEquation.resize(getNumberOfBranches(), 0); //make placeholders in currentEquation
-        currentLoop = loopsInCircuit.at(i);
-        startingNode = currentLoop.at(0).getFirstNode();
-        //Go through the Loop
+        for (int i = 0;
+             i <
+             getnumberOfLoops(); i++) { // i represents index number of a loop in a loop matrix, rows represent loops
+            sumOfVoltageSourcesInLoop = 0;
+            currentEquation.clear();
+            currentEquation.resize(getNumberOfBranches(), 0); //make placeholders in currentEquation
+            currentLoop = loopsInCircuit.at(i);
+            startingNode = currentLoop.at(0).getFirstNode();
+            //Go through the Loop
 
-        for (int j = 0; j < currentLoop.size(); j++) {
-            int indexOfABranchInBranchesVector = getIndexOfABranchInBranches(currentLoop.at(j));
-            Node commonNodeOfBranches;
-            //check the direction of the loop (checking which node is the common node for this branch and the next one)
-            if (j !=
-                currentLoop.size() - 1) //If this is the last branch in the loop, check it with the first (starting one)
-                commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(j + 1));
-            else
-                commonNodeOfBranches = commonNode(currentLoop.at(j),
-                                                  currentLoop.at(0)); //else check it with the next one
-            if (currentLoop.size() == 2) { //SPECIAL CASE -- Loop has only two branches -- they have both nodes common
-                if ((commonNodeOfBranches == currentLoop.at(0).getFirstNode() &&  //If they have same node orientation
-                     commonNodeOfBranches == currentLoop.at(1).getFirstNode()) || // FirstNode of first branch is same as First Node second branch
-                    (commonNodeOfBranches == currentLoop.at(0).getSecondNode() && //SecondNude of first branch same as second node second branch
-                     commonNodeOfBranches == currentLoop.at(1).getSecondNode())) {
-                    //first branch
-                    resistanceOfABranch = currentLoop.at(0).getResistance();
-                    voltageOfABranch = currentLoop.at(0).getVoltageFromVoltageSources();
-                    currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch;
-                    sumOfVoltageSourcesInLoop -= voltageOfABranch;
-                    //second branch
-                    resistanceOfABranch = currentLoop.at(1).getResistance();
-                    voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
-                    indexOfABranchInBranchesVector= getIndexOfABranchInBranches(currentLoop.at(1));
-                    currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch*(-1);
-                    sumOfVoltageSourcesInLoop+=voltageOfABranch;
+            for (int j = 0; j < currentLoop.size(); j++) {
+                int indexOfABranchInBranchesVector = getIndexOfABranchInBranches(currentLoop.at(j));
+                Node commonNodeOfBranches;
+                //check the direction of the loop (checking which node is the common node for this branch and the next one)
+                if (j !=
+                    currentLoop.size() -
+                    1) //If this is the last branch in the loop, check it with the first (starting one)
+                    commonNodeOfBranches = commonNode(currentLoop.at(j), currentLoop.at(j + 1));
+                else
+                    commonNodeOfBranches = commonNode(currentLoop.at(j),
+                                                      currentLoop.at(0)); //else check it with the next one
+                if (currentLoop.size() ==
+                    2) { //SPECIAL CASE -- Loop has only two branches -- they have both nodes common
+                    if ((commonNodeOfBranches == currentLoop.at(0).getFirstNode() &&
+                         //If they have same node orientation
+                         commonNodeOfBranches == currentLoop.at(1).getFirstNode()) ||
+                        // FirstNode of first branch is same as First Node second branch
+                        (commonNodeOfBranches == currentLoop.at(0).getSecondNode() &&
+                         //SecondNude of first branch same as second node second branch
+                         commonNodeOfBranches == currentLoop.at(1).getSecondNode())) {
+                        //first branch
+                        resistanceOfABranch = currentLoop.at(0).getResistance();
+                        voltageOfABranch = currentLoop.at(0).getVoltageFromVoltageSources();
+                        currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
+                        sumOfVoltageSourcesInLoop -= voltageOfABranch;
+                        //second branch
+                        resistanceOfABranch = currentLoop.at(1).getResistance();
+                        voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
+                        indexOfABranchInBranchesVector = getIndexOfABranchInBranches(currentLoop.at(1));
+                        currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch * (-1);
+                        sumOfVoltageSourcesInLoop += voltageOfABranch;
+                    } else {
+                        //first branch
+                        resistanceOfABranch = currentLoop.at(0).getResistance();
+                        voltageOfABranch = currentLoop.at(0).getVoltageFromVoltageSources();
+                        currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
+                        sumOfVoltageSourcesInLoop -= voltageOfABranch;
+                        //second branch
+                        resistanceOfABranch = currentLoop.at(1).getResistance();
+                        voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
+                        indexOfABranchInBranchesVector = getIndexOfABranchInBranches(currentLoop.at(1));
+                        currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
+                        sumOfVoltageSourcesInLoop -= voltageOfABranch;
+                    }
+                    break;
                 }
-                else{
-                    //first branch
-                    resistanceOfABranch = currentLoop.at(0).getResistance();
-                    voltageOfABranch = currentLoop.at(0).getVoltageFromVoltageSources();
-                    currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch;
+                resistanceOfABranch = currentLoop.at(j).getResistance();
+                voltageOfABranch = currentLoop.at(j).getVoltageFromVoltageSources();
+                if (commonNodeOfBranches == currentLoop.at(j).getFirstNode()) {
+                    currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
                     sumOfVoltageSourcesInLoop -= voltageOfABranch;
-                    //second branch
-                    resistanceOfABranch = currentLoop.at(1).getResistance();
-                    voltageOfABranch = currentLoop.at(1).getVoltageFromVoltageSources();
-                    indexOfABranchInBranchesVector= getIndexOfABranchInBranches(currentLoop.at(1));
-                    currentEquation.at(indexOfABranchInBranchesVector)=resistanceOfABranch;
-                    sumOfVoltageSourcesInLoop-=voltageOfABranch;
+                } else {
+                    currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch * (-1);
+                    sumOfVoltageSourcesInLoop += voltageOfABranch;
                 }
+            }
+            currentEquation.push_back(sumOfVoltageSourcesInLoop);
+            matrixSecondKirchoffRule.push_back(currentEquation);
+        }
+
+    vector<double> equationForCurrentSources;
+    bool isThereCurrentSource = false;
+    for(auto b:branches){
+        equationForCurrentSources = vector<double> (getNumberOfBranches(),0.0);
+        isThereCurrentSource=false;
+        if(b.hasCurrentSources()) {
+            isThereCurrentSource = true;
+            equationForCurrentSources.at(5)=1;
+
+            double current=0;
+            for(auto c : b.getCurrentSources()) {
+                current=c.getCurrent()*(-1);
                 break;
             }
-            resistanceOfABranch = currentLoop.at(j).getResistance();
-            voltageOfABranch = currentLoop.at(j).getVoltageFromVoltageSources();
-            if (commonNodeOfBranches == currentLoop.at(j).getFirstNode()) {
-                currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch;
-                sumOfVoltageSourcesInLoop -= voltageOfABranch;
-            } else {
-                currentEquation.at(indexOfABranchInBranchesVector) = resistanceOfABranch * (-1);
-                sumOfVoltageSourcesInLoop += voltageOfABranch;
-            }
+
+            equationForCurrentSources.push_back(current);
         }
-        currentEquation.push_back(sumOfVoltageSourcesInLoop);
-        matrixSecondKirchoffRule.push_back(currentEquation);
+        if(isThereCurrentSource) matrixSecondKirchoffRule.push_back(equationForCurrentSources);
     }
+
     return matrixSecondKirchoffRule;
 }
 
@@ -519,10 +545,41 @@ std::vector<std::vector<double>> Circuit::secondKirchoffsLaw() {
 
 
 vector<double> Circuit::measureCurrentsOfACircuit(){
+    vector<double> currentsInTheCircuit = {};
+    if(getNumberOfBranches()==1){
+        if(getBranches().at(0).hasCurrentSources()){
+            currentsInTheCircuit.push_back(getBranches().at(0).getCurrentFromCurrentSources());
+            return currentsInTheCircuit;
+        }
+        else{
+            Branch b = getBranches().at(0);
+            double current;
+            current = b.getVoltageFromVoltageSources()/b.getResistance();
+            currentsInTheCircuit.push_back(current);
+            return currentsInTheCircuit;
+        }
+    }
     vector<vector<int>> firstKirchoffsLawMatrix = firstKirchhoffsLaw();
     vector<vector<double>> secondKirchoffsLawMatrix = secondKirchoffsLaw();
+    firstKirchoffsLawMatrix.erase(firstKirchoffsLawMatrix.begin()+firstKirchoffsLawMatrix.size()-1);
+    int numberOfEquations = firstKirchoffsLawMatrix.size() + secondKirchoffsLawMatrix.size();
 
-    vector<vector<double>> finalCurrentMatrix;
+
+
+
+
+
+    vector<vector<double>> equationMatrix;
+
+    for(auto i : secondKirchoffsLawMatrix){
+        vector<double> vectorRow;
+        vectorRow.clear();
+        for(auto j : i){
+            if(j == i.at(i.size()-1))break;
+            else vectorRow.push_back(j);
+        }
+        equationMatrix.push_back(vectorRow);
+    }
 
    for(auto i : firstKirchoffsLawMatrix){
        vector<double> vectorRow;
@@ -530,28 +587,41 @@ vector<double> Circuit::measureCurrentsOfACircuit(){
        for(auto j : i){
            vectorRow.push_back((double) j);
        }
-       finalCurrentMatrix.push_back(vectorRow);
+       equationMatrix.push_back(vectorRow);
    }
-   for(auto i : secondKirchoffsLawMatrix){
-       vector<double> vectorRow;
-       vectorRow.clear();
-       for(auto j : i){
-           if(j == i.at(i.size()-1))break;
-           else vectorRow.push_back(j);
+
+
+   CMatrix finalMatrix("finalMatrixOfEquations", equationMatrix.size(), getNumberOfBranches());
+
+   for(int i = 0; i < equationMatrix.size(); i++){
+       for(int j = 0; j < equationMatrix.at(i).size(); j++){
+           finalMatrix.m_pData[i][j] = equationMatrix.at(i).at(j);
        }
-       finalCurrentMatrix.push_back(vectorRow);
    }
 
-
-
-   std::cout<<std::endl;
-    for(auto i : finalCurrentMatrix){
-        for(auto j : i){
-            std::cout<<j<<" ";
-        }
-        std::cout<<std::endl;
+   CMatrix sourcesMatrix("sourcesMatrix", getNumberOfBranches(), 1);
+    for(int i = 0; i < secondKirchoffsLawMatrix.size(); i++){
+            sourcesMatrix.m_pData[i][0] = secondKirchoffsLawMatrix.at(i).at(secondKirchoffsLawMatrix.at(i).size()-1) * (-1); // EQUATIONS * CURRENT + SOURCES = 0, *(-1) to shift SOURCES to right side
     }
-    return finalCurrentMatrix.at(0);
+
+
+   CMatrix currentMatrix("currentMatrix",getNumberOfBranches(),1);
+
+   finalMatrix = finalMatrix.Inverse();
+   currentMatrix = finalMatrix * sourcesMatrix;
+
+
+
+   for(int i = 0; i < getNumberOfBranches(); i++){
+       currentsInTheCircuit.push_back(currentMatrix.m_pData[i][0]);
+   }
+
+   //set currents
+   for(int i = 0; i < getNumberOfBranches(); i++){
+       branches.at(i).setCurrent(currentsInTheCircuit.at(i));
+   }
+
+    return currentsInTheCircuit;
     
 }
 
@@ -564,56 +634,36 @@ int main() {
     Node e(5);
     Node f(6);
     Node g(7);
-    Branch B1 = Branch(1, a, f);
-    Branch B2 = Branch(2, f, c);
-    Branch B3 = Branch(3, c, e);
-    Branch B4 = Branch(4, e, g);
-    Branch B5 = Branch(5, g, d);
-    Branch B6 = Branch(6, d, a);
-    Branch B7 = Branch(7, a, b);
-    Branch B8 = Branch(8, b, d);
-    Branch B9 = Branch(9, d, e);
-    Branch B10 = Branch(10, e, b);
-    Branch B11 = Branch(11, b, c);
-    Branch B12 = Branch(12, b, f);
-    Branch B13 = Branch(13, a, b);
-    Branch B14 = Branch(14, b, a);
-    Branch B15 = Branch(15, a, b);
-    //Add some components
-    B1.addResistor(100);
-    B2.addResistor(200);
-    B3.addResistor(300);
-    B4.addResistor(400);
-    B6.addResistor(600);
-    B7.addResistor(700);
-    B9.addResistor(900);
-    B8.addResistor(240);
-    B10.addResistor(1000);
-    VoltageSource v1(1, 20);
-    VoltageSource v2(2, 70);
-    VoltageSource v3(3, 30, 0, false);
-    VoltageSource v4(4, 50);
-    VoltageSource v5(5, 90, 0, false);
-    VoltageSource v6(6, 40, 0, false);
-    B11.addVoltageSource(v2);
+
+
+    VoltageSource v1(1, 5);
+    VoltageSource v2(2, 10);
+    VoltageSource v3(3, 10, 0, false);
+
+    Branch B1 = Branch(1, a, b);
+    B1.addResistor(2000);
     B1.addVoltageSource(v1);
-    B2.addVoltageSource(v2);
-    B1.addVoltageSource(v3);
-    B4.addVoltageSource(v4);
-    B8.addVoltageSource(v5);
 
-    B13.addResistor(250);
-    B13.addVoltageSource(v3);
-    B14.addResistor(500);
-    B15.addResistor(2450);
 
-    //TEST CURRENT SOURCE
-    CurrentSource C1 = CurrentSource(1);
-    std::list<CurrentSource> lista;
-    lista.push_back(C1);
-    B5.setCurrentSources(lista);
+    Branch B2 = Branch(2, b, c);
+    B2.addResistor(1000);
+    B2.addVoltageSource(v1);
 
-    vector<Branch> grane = {B13, B14, B15};
+    Branch B3 = Branch(3, b, d);
+    B3.addVoltageSource(v2);
+
+    Branch B4 = Branch(4, d, c);
+    B4.addResistor(1000);
+
+    Branch B5 = Branch(5, c, a);
+
+    Branch B6 = Branch(6, d, a);
+    //B6.addVoltageSource(v3);
+   // B6.addResistor(1000);
+    CurrentSource C1 = CurrentSource(1,0.5);
+    B6.addCurrentSource(C1);
+
+    vector<Branch> grane = {B1};
     Circuit krug1;
     krug1.setBranches(grane);
 
@@ -663,7 +713,11 @@ int main() {
             std::cout << j << " ";
         std::cout << std::endl;
     }
-    krug1.measureCurrentsOfACircuit();
+    vector<double> currentsInTheCircuit = krug1.measureCurrentsOfACircuit();
+    for(auto i: currentsInTheCircuit){
+        std::cout<<i<<"A, ";
+    }
+
 }
 
 /*  int main() {
